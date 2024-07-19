@@ -1,0 +1,12 @@
+data
+.git
+results
+storage
+COPYING
+docker-compose.yml
+.gitignore
+README.md
+.env
+nohup.out
+.Rproj.user
+otero-garcia-2022-ssRNAseq.Rproj
