@@ -38,6 +38,7 @@ RUN apt-get update \
         -e "BiocManager::install('GSVA')" \
         -e "BiocManager::install('biomaRt')" \
         -e "BiocManager::install('IHW')" \
+        -e "BiocManager::install('ComplexHeatmap')" \
     && apt-get clean \
     && rm -Rf /var/lib/apt/lists/ \
         /tmp/downloaded_packages/ \
