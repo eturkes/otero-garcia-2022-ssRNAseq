@@ -227,13 +227,22 @@ if (!file.exists(rds)) {
   add$external_gene_name <- add$ensembl_gene_id
   gene_anno <- rbind(gene_anno, add)
 
-  dup <- gene_anno[
+  replace <- gene_anno[gene_anno$external_gene_name == "", ]
+  for (i in seq(nrow(replace))) {
+    for (j in seq(nrow(gene_anno))) {
+      if (replace$ensembl_gene_id[i] == gene_anno$ensembl_gene_id[j]) {
+        gene_anno$external_gene_name[j] <- gene_anno$ensembl_gene_id[j]
+      }
+    }
+  }
+
+  replace <- gene_anno[
     duplicated(gene_anno$external_gene_name) |
       duplicated(gene_anno$external_gene_name, fromLast = TRUE),
   ]
-  for (i in seq(nrow(dup))) {
+  for (i in seq(nrow(replace))) {
     for (j in seq(nrow(gene_anno))) {
-      if (dup$ensembl_gene_id[i] == gene_anno$ensembl_gene_id[j]) {
+      if (replace$ensembl_gene_id[i] == gene_anno$ensembl_gene_id[j]) {
         gene_anno$external_gene_name[j] <-
           paste(
             gene_anno$external_gene_name[j], gene_anno$ensembl_gene_id[j],
