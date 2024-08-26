@@ -1,0 +1,441 @@
+---
+title: "Otero-Garcia 2022 ssRNAseq - 02 GeneFunnel"
+author:
+  - name: "Emir Turkes"
+date: '`r strftime(Sys.time(), format = "%B %d, %Y")`'
+link-citations: true
+output:
+  html_document:
+    code_folding: hide
+    number_sections: true
+    theme: lumen
+    highlight: haddock
+    toc: true
+    toc_depth: 2
+    toc_float:
+      collapsed: false
+      smooth_scroll: false
+knit: (function(inputFile, encoding) {
+  rmarkdown::render(
+    inputFile, encoding = encoding,
+    output_file = file.path(
+      "..", "results", "otero_garcia_2022_ssRNAseq_02genefunnel.html"
+  ))})
+---
+
+<style type="text/css">
+body {font-size: 16px;}
+h1.title {font-size: 35px;}
+h1 {font-size: 24px;}
+h2 {font-size: 22px;}
+.toc-content {padding-left: 0px; padding-right: 0px;}
+div.tocify {width: 100%;}
+.tocify-subheader .tocify-item {
+  font-size: 0.95em; padding-left: 25px; text-indent: 0;
+}
+.tocify-subheader .tocify-subheader .tocify-item {
+  font-size: 0.95em; padding-left: 35px; text-indent: 0;
+}
+div.main-container {max-width: none; width: 100%;}
+</style>
+
+*This file is a part of [otero-garcia-2022-ssRNAseq](https://github.com/eturkes/otero-garcia-2022-ssRNAseq).*
+
+The table of contents in the top left is clickable and can be used to quickly navigate the document.
+To toggle the visibility of code, use the `CODE` toggles at the top right of chunks.
+The toggle at the start of the document controls the visibility of all chunks.
+
+```{r}
+#    This file is part of otero-garcia-2022-ssRNAseq.
+#    Copyright (C) 2024  Emir Turkes, UK DRI at UCL
+#
+#    This program is free software: you can redistribute it and/or modify
+#    it under the terms of the GNU General Public License as published by
+#    the Free Software Foundation, either version 3 of the License, or
+#    (at your option) any later version.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU General Public License for more details.
+#
+#    You should have received a copy of the GNU General Public License
+#    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#
+#    Emir Turkes can be contacted at emir.turkes@eturkes.com
+
+# Load required packages, suppressing startup messages.
+# -----------------------------------------------------
+library(conflicted)
+conflicts_prefer(edgeR::cpm, .quiet = TRUE)
+packages <- c(
+  "GSEABase", "Seurat", "scuttle", "edgeR", "DT", "GSVA", "Rcpp", "biomaRt",
+  "IHW"
+)
+invisible(
+  suppressPackageStartupMessages(
+    lapply(packages, FUN = library, character.only = TRUE)
+  )
+)
+# -----------------------------------------------------
+
+# Define global settings.
+# -----------------------
+knitr::opts_chunk$set(fig.width = 10, fig.height = 7, dpi = 300)
+# -----------------------
+
+# Define functions.
+# -----------------
+source("utils.R")
+sourceCpp(file.path("..", "src", "calculateScores.cpp"))
+
+`%notin%` <- Negate(`%in%`)
+# -----------------
+
+# Useful variables.
+# -----------------
+step <- 2
+
+cache_dir <- file.path("..", "cache", paste0("step", "0", step))
+if (!dir.exists(cache_dir)) {
+  dir.create(cache_dir, recursive = TRUE)
+}
+# -----------------
+```
+
+# Prep
+
+```{r}
+seurat_orig <- readRDS(file.path(cache_dir, "..", "step01", "seurat_prep.rds"))
+
+rds <- file.path(cache_dir, "gene_sets.rds")
+if (file.exists(rds)) {
+  gene_sets <- readRDS(rds)
+} else {
+
+  gene_sets <- getGmt(
+    file.path(
+      "..", "data",
+      "gprofiler_hsapiens_ENSG_2024_08_25", "hsapiens.GO.comb.ENSG.gmt"
+    )
+  )
+  keep <- filterGeneSets(gene_sets, min.sz = 2)
+  gene_sets <- gene_sets[names(gene_sets) %in% names(keep)]
+
+  remove <- unique(unlist(geneIds(gene_sets)))[
+    unique(unlist(geneIds(gene_sets))) %notin% rownames(seurat_orig)
+  ]
+  remove <- which(
+    sapply(geneIds(gene_sets), FUN = function(x) any(x %in% remove))
+  )
+  gene_sets <- gene_sets[-remove]
+
+  for (i in seq_along(gene_sets@.Data)) {
+    go_id <- gene_sets[[i]]@setName
+    suppressWarnings(gene_sets[[i]]@setName <- gene_sets[[i]]@shortDescription)
+    suppressWarnings(gene_sets[[i]]@shortDescription <- go_id)
+  }
+
+  gene_sets_keep <- computeGeneSetsOverlapMax(
+    gene_sets, uniqGenes = unique(unlist(geneIds(gene_sets)))
+  )
+  gene_sets_keep <- rowSums(gene_sets_keep)
+  gene_sets_keep <- gene_sets_keep[order(gene_sets_keep, decreasing = TRUE)]
+  gene_sets_keep <- gene_sets[match(names(gene_sets_keep), names(gene_sets))]
+
+  dup <- sapply(
+    geneIds(gene_sets_keep), FUN = function(x) paste(sort(x), collapse = "-")
+  )
+  dup <- which(duplicated(dup))
+  gene_sets <- gene_sets_keep[-dup]
+
+  saveRDS(gene_sets, file = rds)
+}
+gene_sets
+
+rds <- file.path(cache_dir, "gene_sets_keep.rds")
+if (file.exists(rds)) {
+  gene_sets_keep <- readRDS(rds)
+} else {
+
+  keep <- filterGeneSets(gene_sets, min.sz = 2, max.sz = 45)
+  gene_sets_keep <- gene_sets[names(gene_sets) %in% names(keep)]
+
+  gene_sets_keep <- gene_sets_keep[
+    !grepl("regulation", x = names(gene_sets_keep)) |
+      grepl("positive regulation", x = names(gene_sets_keep))
+  ]
+
+  gene_sets_keep <- gene_sets_keep[
+    !grepl("selection", x = names(gene_sets_keep)) |
+      grepl("positive selection", x = names(gene_sets_keep))
+  ]
+
+  mart <- useEnsembl("ensembl", "hsapiens_gene_ensembl")
+  attributes <- c("ensembl_gene_id", "chromosome_name")
+  gene_anno <- getBM(
+    attributes, filters = "ensembl_gene_id",
+    values = unique(unlist(geneIds(gene_sets_keep))), mart = mart
+  )
+  remove <- gene_anno[
+    gene_anno$chromosome_name == "Y" |
+      gene_anno$ensembl_gene_id == "ENSG00000229807" |
+      gene_anno$ensembl_gene_id == "ENSG00000270641",
+  ]$ensembl_gene_id
+  remove <- which(
+    sapply(geneIds(gene_sets_keep), FUN = function(x) any(x %in% remove))
+  )
+  gene_sets_keep <- gene_sets_keep[-remove]
+
+  gene_sets_ordered <- computeGeneSetsOverlapMax(
+    gene_sets_keep, uniqGenes = unique(unlist(geneIds(gene_sets_keep)))
+  )
+  gene_sets_ordered <- rowSums(gene_sets_ordered)
+  gene_sets_ordered <- gene_sets_ordered[order(gene_sets_ordered)]
+  gene_sets_keep <- gene_sets_keep[
+    match(names(gene_sets_ordered), names(gene_sets_keep))
+  ]
+
+  gene_sets_keep <- computeGeneSetsOverlapMax(
+    gene_sets_keep, uniqGenes = unique(unlist(geneIds(gene_sets_keep)))
+  )
+  gene_sets_keep[upper.tri(gene_sets_keep)] <- 0
+  diag(gene_sets_keep) <- 0
+  gene_sets_keep <- apply(gene_sets_keep, MARGIN = 1, FUN = max)
+  gene_sets_keep <- gene_sets_keep[gene_sets_keep < 0.7]
+
+  rm(gene_sets_ordered)
+  saveRDS(gene_sets_keep, file = rds)
+}
+gene_sets[names(gene_sets) %in% names(gene_sets_keep)]
+
+rds <- file.path(cache_dir, "gene_anno.rds")
+if (!file.exists(rds)) {
+
+  mart <- useEnsembl("ensembl", "hsapiens_gene_ensembl")
+  attributes <- c("ensembl_gene_id", "external_gene_name")
+  gene_anno <- getBM(
+    attributes, filters = "ensembl_gene_id",
+    values = rownames(seurat_orig), mart = mart
+  )
+
+  add <- data.frame(
+    ensembl_gene_id = rownames(seurat_orig)[
+      rownames(seurat_orig) %notin% gene_anno$ensembl_gene_id
+    ]
+  )
+  add$external_gene_name <- add$ensembl_gene_id
+  gene_anno <- rbind(gene_anno, add)
+
+  dup <- gene_anno[
+    duplicated(gene_anno$external_gene_name) |
+      duplicated(gene_anno$external_gene_name, fromLast = TRUE),
+  ]
+  for (i in seq(nrow(dup))) {
+    for (j in seq(nrow(gene_anno))) {
+      if (dup$ensembl_gene_id[i] == gene_anno$ensembl_gene_id[j]) {
+        gene_anno$external_gene_name[j] <-
+          paste(
+            gene_anno$external_gene_name[j], gene_anno$ensembl_gene_id[j],
+            sep = "-"
+          )
+      }
+    }
+  }
+
+  gene_anno <- gene_anno[ , c(2, 1)]
+  colnames(gene_anno) <- c("symbol", "ensembl")
+  saveRDS(gene_anno, file = rds)
+}
+
+ctypes <- vector("list", length = 1)
+ctypes <- list(
+  `L2/4_Cortex` = c("Ex01_CUX2-LAMP5 (L2-L3)", "Ex02_CUX2-COL5A2 (L2-L4)")
+)
+
+rds <- file.path(cache_dir, "seurat_list.rds")
+if (file.exists(rds)) {
+  rm(seurat_orig)
+  gc()
+  seurat_list <- readRDS(rds)
+} else {
+
+  seurat_orig@active.ident <- seurat_orig$Cell.Types
+  seurat_list <- vector("list", length = 1)
+  for (i in seq_along(ctypes)) {
+
+    seurat <- subset(seurat_orig, idents = ctypes[[i]])
+    seurat$tau <- ifelse(seurat$SORT == "AT8", yes = "NFT", no = "CTRL")
+    seurat$Sample.ID <- factor(seurat$Sample.ID)
+    seurat$donor_id <- factor(seurat$donor_id)
+
+    gc()
+    DefaultAssay(seurat) <- "RNA"
+    scores <- calculateScores(
+      GetAssayData(seurat, layer = "counts"), rownames(seurat),
+      geneIds(gene_sets)
+    )
+    gc()
+    rownames(scores) <- names(gene_sets)
+    colnames(scores) <- colnames(seurat)
+
+    seurat[["GF"]] <- CreateAssay5Object(scores, data = log1p(scores))
+    DefaultAssay(seurat) <- "GF"
+    seurat$nCount_GF <- colSums(seurat, layer = "counts")
+    seurat$nFeature_GF <- colSums(
+      GetAssayData(seurat, layer = "counts") > 0
+    )
+
+    seurat_list[[i]] <- seurat
+  }
+  rm(seurat_orig, seurat, scores)
+  gc()
+  saveRDS(seurat_list, file = rds)
+}
+seurat_list
+
+gse_data <- vector("list", length = 1)
+deg_data <- vector("list", length = 1)
+gse_list <- vector("list", length = 1)
+deg_list <- vector("list", length = 1)
+
+for (i in seq_along(seurat_list)) {
+
+  seurat_sub <- subset(
+    seurat_list[[i]], downsample = min(table(seurat_list[[i]]$Sample.ID))
+  )
+
+  gse <- as.SingleCellExperiment(seurat_list[[i]], assay = "GF")
+  keep <- filterByExpr(
+    GetAssayData(seurat_sub, assay = "GF", layer = "counts"),
+    group = seurat_sub$tau,
+    min.prop = 0.01,
+    min.count = 1,
+    min.total.count = 1.5,
+    large.n = 0
+  )
+  gse <- gse[keep, ]
+  gse <- suppressWarnings(
+    aggregateAcrossCells(
+      gse, colData(gse)[ , "Sample.ID"],
+      use_exprs_values = "counts", statistics = "sum"
+    )
+  )
+
+  deg <- as.SingleCellExperiment(seurat_list[[i]], assay = "RNA")
+  keep <- filterByExpr(
+    GetAssayData(seurat_sub, assay = "RNA", layer = "counts"),
+    group = seurat_sub$tau,
+    min.prop = 0.01,
+    min.count = 1,
+    min.total.count = 1.5,
+    large.n = 0
+  )
+  deg <- deg[keep, ]
+  deg <- suppressWarnings(
+    aggregateAcrossCells(
+      deg, colData(deg)[ , "Sample.ID"],
+      use_exprs_values = "counts", statistics = "sum"
+    )
+  )
+
+  dge <- DGEList(counts(gse))
+  keep <- filterByExpr(
+    dge, group = gse$tau,
+    min.count = 10, min.total.count = 15
+  )
+  dge <- dge[keep, ]
+  dge <- calcNormFactors(dge)
+  keep <- filterByExpr(
+    dge, group = gse$tau,
+    min.count = 10, min.total.count = 15
+  )
+  dge <- dge[keep, , keep.lib.sizes = FALSE]
+
+  gse <- gse[rownames(gse) %in% rownames(dge)]
+  logcounts(gse, withDimnames = FALSE) <- cpm(
+    dge, log = TRUE, prior.count = 2
+  )
+
+  gse <- gse[rownames(gse) %in% names(gene_sets_keep), ]
+  gse_data[[i]] <- gse
+
+  dge <- DGEList(counts(deg))
+  keep <- filterByExpr(
+    dge, group = deg$tau,
+    min.count = 10, min.total.count = 15
+  )
+  dge <- dge[keep, ]
+  dge <- calcNormFactors(dge)
+  keep <- filterByExpr(
+    dge, group = gse$tau,
+    min.count = 10, min.total.count = 15
+  )
+  dge <- dge[keep, , keep.lib.sizes = FALSE]
+
+  deg <- deg[rownames(deg) %in% rownames(dge)]
+  logcounts(deg, withDimnames = FALSE) <- cpm(
+    dge, log = TRUE, prior.count = 2
+  )
+
+  gene_sets_sub <- gene_sets[names(gene_sets) %in% rownames(gse)]
+  deg <- deg[rownames(deg) %in% unique(unlist(geneIds(gene_sets_sub))), ]
+  deg_data[[i]] <- deg
+
+  design <- model.matrix(~ 0 + gse$tau + gse$donor_id)
+  colnames(design) <- make.names(colnames(design))
+  cont_mat <- makeContrasts(
+    NFT_CTRL =
+      gse.tauNFT -
+      gse.tauCTRL,
+    levels = design
+  )
+
+  fit <- lmFit(logcounts(gse), design)
+  fit <- contrasts.fit(fit, cont_mat)
+  fit <- eBayes(fit, trend = TRUE, robust = TRUE)
+
+  tests <- decideTests(fit, method = "global")
+  write.fit(
+    fit, tests, file.path(cache_dir, "results.tsv"),
+    adjust = "BH", F.adjust = "BH", method = "global"
+  )
+  gse_list[[i]] <- read.delim(file.path(cache_dir, "results.tsv"))
+
+  fit <- lmFit(logcounts(deg), design)
+  fit <- contrasts.fit(fit, cont_mat)
+  fit <- eBayes(fit, trend = TRUE, robust = TRUE)
+
+  tests <- decideTests(fit, method = "global")
+  write.fit(
+    fit, tests, file.path(cache_dir, "results.tsv"),
+    adjust = "BH", F.adjust = "BH", method = "global"
+  )
+  deg_list[[i]] <- read.delim(file.path(cache_dir, "results.tsv"))
+}
+
+rds <- file.path(cache_dir, "gse_data.rds")
+if (!file.exists(rds)) {
+  saveRDS(gse_data, file = rds)
+}
+rds <- file.path(cache_dir, "deg_data.rds")
+if (!file.exists(rds)) {
+  saveRDS(deg_data, file = rds)
+}
+rds <- file.path(cache_dir, "gse_list.rds")
+if (!file.exists(rds)) {
+  saveRDS(gse_list, file = rds)
+}
+rds <- file.path(cache_dir, "deg_list.rds")
+if (!file.exists(rds)) {
+  saveRDS(deg_list, file = rds)
+}
+```
+
+# References
+
+This is the concluding section of the document, where we output the `sessionInfo`, and create a bibliography for works cited.
+
+```{r}
+sessionInfo()
+```

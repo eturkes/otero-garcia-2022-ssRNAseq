@@ -32,6 +32,12 @@ RUN apt-get update \
         -e "install.packages('DT')" \
         -e "install.packages('BiocManager')" \
         -e "BiocManager::install('glmGamPoi')" \
+        -e "BiocManager::install('GSEABase')" \
+        -e "BiocManager::install('scuttle')" \
+        -e "BiocManager::install('edgeR')" \
+        -e "BiocManager::install('GSVA')" \
+        -e "BiocManager::install('biomaRt')" \
+        -e "BiocManager::install('IHW')" \
     && apt-get clean \
     && rm -Rf /var/lib/apt/lists/ \
         /tmp/downloaded_packages/ \
