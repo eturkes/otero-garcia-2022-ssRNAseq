@@ -224,7 +224,8 @@ results$gene_set <- rownames(results)
 results_up <- results[results$Coef > 0, ]
 results_down <- results[results$Coef < 0, ]
 
-datatable_download(results)
+datatable_download(results_up)
+datatable_download(results_down)
 ```
 
 ```{r, fig.width = 12, fig.height = 8}
@@ -357,7 +358,8 @@ results <- results[ , c(ncol(results), 2:(ncol(results) -1))]
 results_up <- results[results$Coef > 0, ]
 results_down <- results[results$Coef < 0, ]
 
-datatable_download(results)
+datatable_download(results_up)
+datatable_download(results_down)
 ```
 
 ```{r, fig.width = 8, fig.height = 8}
@@ -494,7 +496,8 @@ top_gse <- rownames(results)
 results_up <- results[results$Coef > 0, ]
 results_down <- results[results$Coef < 0, ]
 
-datatable_download(results)
+datatable_download(results_up)
+datatable_download(results_down)
 ```
 
 ```{r, fig.width = 12, fig.height = 8}
@@ -632,7 +635,8 @@ results <- results[
 results_up <- results[results$Coef > 0, ]
 results_down <- results[results$Coef < 0, ]
 
-datatable_download(results)
+datatable_download(results_up)
+datatable_download(results_down)
 ```
 
 ```{r, fig.width = 8, fig.height = 8}
