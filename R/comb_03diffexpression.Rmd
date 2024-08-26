@@ -353,7 +353,7 @@ gene_anno_sub <- gene_anno_sub[
   match(rownames(results), gene_anno_sub$ensembl),
 ]
 results$Gene <- gene_anno_sub$symbol
-results <- results[ , c(ncol(results), 2:(ncol(results) -1))]
+results <- results[ , c(ncol(results), 1:(ncol(results) -1))]
 
 results_up <- results[results$Coef > 0, ]
 results_down <- results[results$Coef < 0, ]
@@ -625,7 +625,7 @@ gene_anno_sub <- gene_anno_sub[
   match(rownames(results), gene_anno_sub$ensembl),
 ]
 results$Gene <- gene_anno_sub$symbol
-results <- results[ , c(ncol(results), 2:(ncol(results) -1))]
+results <- results[ , c(ncol(results), 1:(ncol(results) -1))]
 
 results <- results[
   rownames(results) %in%
