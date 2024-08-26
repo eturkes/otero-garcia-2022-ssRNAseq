@@ -1,5 +1,5 @@
 ---
-title: "Combined Samples - 03 Differential Expression"
+title: "Otero-Garcia 2022 ssRNAseq - 03 Differential Expression"
 author:
   - name: "Emir Turkes"
 date: '`r strftime(Sys.time(), format = "%B %d, %Y")`'
@@ -19,7 +19,7 @@ knit: (function(inputFile, encoding) {
   rmarkdown::render(
     inputFile, encoding = encoding,
     output_file = file.path(
-      "..", "..", "results", "comb", "comb_03diffexpression.html"
+      "..", "results", "otero_garcia_2022_ssRNAseq_03diffexpression.html"
     ))})
 ---
 
@@ -43,7 +43,7 @@ div.tocify {width: 100%;}
 div.main-container {max-width: none; width: 100%;}
 </style>
 
-*This file is a part of [tau-mutant-snRNAseq](https://github.com/eturkes/tau-mutant-snRNAseq).*
+*This file is a part of [otero-garcia-2022-ssRNAseq](https://github.com/eturkes/otero-garcia-2022-ssRNAseq).*
 
 The table of contents in the top left is clickable and can be used to quickly navigate the document.
 To toggle the visibility of code, use the `CODE` toggles at the top right of chunks.
@@ -728,6 +728,7 @@ Heatmap(
   )
 )
 ```
+
 # References
 
 This is the concluding section of the document, where we output the `sessionInfo`, and create a bibliography for works cited.
