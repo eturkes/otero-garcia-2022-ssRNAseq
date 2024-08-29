@@ -180,6 +180,7 @@ if (file.exists(rds)) {
 
   seurat_orig$tau <- ifelse(seurat_orig$SORT == "AT8", yes = "NFT", no = "CTRL")
   seurat_orig$donor_id <- factor(seurat_orig$donor_id)
+  seurat_orig$Sample.ID <- factor(seurat_orig$Sample.ID)
 
   saveRDS(seurat_orig, file = rds)
 }
