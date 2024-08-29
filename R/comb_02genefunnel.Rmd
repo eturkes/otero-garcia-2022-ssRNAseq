@@ -96,6 +96,7 @@ sourceCpp(file.path("..", "src", "calculateScores.cpp"))
 # -----------------
 step <- 2
 
+data_dir <- file.path("..", "data")
 cache_dir <- file.path("..", "cache", paste0("step", "0", step))
 if (!dir.exists(cache_dir)) {
   dir.create(cache_dir, recursive = TRUE)
@@ -106,7 +107,83 @@ if (!dir.exists(cache_dir)) {
 # Prep
 
 ```{r}
-seurat_orig <- readRDS(file.path(cache_dir, "..", "step01", "seurat_prep.rds"))
+rds <- file.path(cache_dir, "seurat_orig.rds")
+if (file.exists(rds)) {
+  seurat_orig <- readRDS(rds)
+} else {
+
+  file_list <- list.files(file.path(data_dir, "raw_data"), recursive = TRUE)
+  files <- vector("list", length = length(file_list))
+  for (i in seq_along(files)) {
+    files[[i]] <- suppressWarnings(
+      CreateSeuratObject(
+        Read10X_h5(
+          file.path(data_dir, "raw_data", file_list[[i]]), use.names = FALSE
+        )
+      )
+    )
+  }
+
+  seurat_orig <- readRDS(
+    file.path(cache_dir, "..", "step01", "seurat_prep.rds")
+  )
+
+  seurat <- merge(
+    files[[11]], c(files[[15]], files[[7]], files[[9]],
+    files[[3]], files[[5]], files[[1]], files[[13]],
+    files[[12]], files[[16]], files[[8]], files[[10]],
+    files[[4]], files[[6]], files[[2]], files[[14]]
+    ),
+    add.cell.ids = unique(sub("_.*", "", colnames(seurat_orig)))
+  )
+  seurat <- JoinLayers(seurat)
+  rm(files)
+
+  # seurat <- seurat[ ,
+  #   match(
+  #     c(
+  #       colnames(seurat)[which(sub("_.*", "", colnames(seurat)) == "C0013")],
+  #       colnames(seurat)[which(sub("_.*", "", colnames(seurat)) == "C0009")],
+  #       colnames(seurat)[which(sub("_.*", "", colnames(seurat)) == "C0011")],
+  #       colnames(seurat)[which(sub("_.*", "", colnames(seurat)) == "C0005")],
+  #       colnames(seurat)[which(sub("_.*", "", colnames(seurat)) == "C0007")],
+  #       colnames(seurat)[which(sub("_.*", "", colnames(seurat)) == "C0001")],
+  #       colnames(seurat)[which(sub("_.*", "", colnames(seurat)) == "C0015")],
+  #       colnames(seurat)[which(sub("_.*", "", colnames(seurat)) == "C0003")],
+  #       colnames(seurat)[which(sub("_.*", "", colnames(seurat)) == "C0014")],
+  #       colnames(seurat)[which(sub("_.*", "", colnames(seurat)) == "C0010")],
+  #       colnames(seurat)[which(sub("_.*", "", colnames(seurat)) == "C0012")],
+  #       colnames(seurat)[which(sub("_.*", "", colnames(seurat)) == "C0006")],
+  #       colnames(seurat)[which(sub("_.*", "", colnames(seurat)) == "C0008")],
+  #       colnames(seurat)[which(sub("_.*", "", colnames(seurat)) == "C0002")],
+  #       colnames(seurat)[which(sub("_.*", "", colnames(seurat)) == "C0016")],
+  #       colnames(seurat)[which(sub("_.*", "", colnames(seurat)) == "C0004")]
+  #     ),
+  #     colnames(seurat)
+  #   )
+  # ]
+
+  seurat_orig <- seurat_orig[ , colnames(seurat_orig) %in% colnames(seurat)]
+  seurat <- seurat[ , colnames(seurat) %in% colnames(seurat_orig)]
+  # seurat_orig <- seurat_orig[ , match(colnames(seurat), colnames(seurat_orig))]
+  seurat_orig[["RNA"]] <- CreateAssay5Object(
+    GetAssayData(seurat, assay = "RNA")
+  )
+  DefaultAssay(seurat_orig) <- "RNA"
+  rm(seurat)
+
+  seurat_orig@misc <- list(
+    geneids = rownames(
+      Read10X_h5(file.path(data_dir, "raw_data", file_list[[1]]))
+    )
+  )
+
+  seurat_orig$tau <- ifelse(seurat_orig$SORT == "AT8", yes = "NFT", no = "CTRL")
+  seurat_orig$donor_id <- factor(seurat_orig$donor_id)
+
+  saveRDS(seurat_orig, file = rds)
+}
+seurat_orig
 
 rds <- file.path(cache_dir, "gene_sets.rds")
 if (file.exists(rds)) {
@@ -209,82 +286,39 @@ if (file.exists(rds)) {
 }
 gene_sets[names(gene_sets) %in% names(gene_sets_keep)]
 
+gene_anno <- data.frame(
+  symbol = unlist(seurat_orig@misc), ensembl = rownames(seurat_orig)
+)
 rds <- file.path(cache_dir, "gene_anno.rds")
 if (!file.exists(rds)) {
-
-  mart <- useEnsembl("ensembl", "hsapiens_gene_ensembl")
-  attributes <- c("ensembl_gene_id", "external_gene_name")
-  gene_anno <- getBM(
-    attributes, filters = "ensembl_gene_id",
-    values = rownames(seurat_orig), mart = mart
-  )
-
-  add <- data.frame(
-    ensembl_gene_id = rownames(seurat_orig)[
-      rownames(seurat_orig) %notin% gene_anno$ensembl_gene_id
-    ]
-  )
-  add$external_gene_name <- add$ensembl_gene_id
-  gene_anno <- rbind(gene_anno, add)
-
-  replace <- gene_anno[gene_anno$external_gene_name == "", ]
-  for (i in seq(nrow(replace))) {
-    for (j in seq(nrow(gene_anno))) {
-      if (replace$ensembl_gene_id[i] == gene_anno$ensembl_gene_id[j]) {
-        gene_anno$external_gene_name[j] <- gene_anno$ensembl_gene_id[j]
-      }
-    }
-  }
-
-  replace <- gene_anno[
-    duplicated(gene_anno$external_gene_name) |
-      duplicated(gene_anno$external_gene_name, fromLast = TRUE),
-  ]
-  for (i in seq(nrow(replace))) {
-    for (j in seq(nrow(gene_anno))) {
-      if (replace$ensembl_gene_id[i] == gene_anno$ensembl_gene_id[j]) {
-        gene_anno$external_gene_name[j] <-
-          paste(
-            gene_anno$external_gene_name[j], gene_anno$ensembl_gene_id[j],
-            sep = "-"
-          )
-      }
-    }
-  }
-
-  gene_anno <- gene_anno[ , c(2, 1)]
-  colnames(gene_anno) <- c("symbol", "ensembl")
   saveRDS(gene_anno, file = rds)
 }
 
-ctypes <- vector("list", length = 1)
+ctypes <- vector("list", length = 5)
 ctypes <- list(
-  `L2/4_Cortex` = c("Ex01_CUX2-LAMP5 (L2-L3)", "Ex02_CUX2-COL5A2 (L2-L4)")
+  `Ex01_CUX2-LAMP5 (L2-L3)` = "Ex01_CUX2-LAMP5 (L2-L3)",
+  `Ex02_CUX2-COL5A2 (L2-L4)` = "Ex02_CUX2-COL5A2 (L2-L4)",
+  `Ex03_RORB-MME (L4-L5)` = "Ex03_RORB-MME (L4-L5)",
+  `Ex07_RORB-PCP4 (L5)` = "Ex07_RORB-PCP4 (L5)",
+  `Ex10_THEMIS (L5-6)` = "Ex10_THEMIS (L5-6)"
 )
 
 rds <- file.path(cache_dir, "seurat_list.rds")
 if (file.exists(rds)) {
   rm(seurat_orig)
-  gc()
   seurat_list <- readRDS(rds)
 } else {
 
   seurat_orig@active.ident <- seurat_orig$Cell.Types
-  seurat_list <- vector("list", length = 1)
+  seurat_list <- vector("list", length = 5)
   for (i in seq_along(ctypes)) {
 
     seurat <- subset(seurat_orig, idents = ctypes[[i]])
-    seurat$tau <- ifelse(seurat$SORT == "AT8", yes = "NFT", no = "CTRL")
-    seurat$Sample.ID <- factor(seurat$Sample.ID)
-    seurat$donor_id <- factor(seurat$donor_id)
 
-    gc()
-    DefaultAssay(seurat) <- "RNA"
     scores <- calculateScores(
       GetAssayData(seurat, layer = "counts"), rownames(seurat),
       geneIds(gene_sets)
     )
-    gc()
     rownames(scores) <- names(gene_sets)
     colnames(scores) <- colnames(seurat)
 
@@ -298,15 +332,14 @@ if (file.exists(rds)) {
     seurat_list[[i]] <- seurat
   }
   rm(seurat_orig, seurat, scores)
-  gc()
   saveRDS(seurat_list, file = rds)
 }
 seurat_list
 
-gse_data <- vector("list", length = 1)
-deg_data <- vector("list", length = 1)
-gse_list <- vector("list", length = 1)
-deg_list <- vector("list", length = 1)
+gse_data <- vector("list", length = 5)
+deg_data <- vector("list", length = 5)
+gse_list <- vector("list", length = 5)
+deg_list <- vector("list", length = 5)
 
 for (i in seq_along(seurat_list)) {
 
