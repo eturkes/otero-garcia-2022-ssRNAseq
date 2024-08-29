@@ -105,9 +105,9 @@ parallel_override <- 0
 # Metadata to plot after dimensionality reduction and clustering.
 # Values in list can include "no_legend and/or "no_label" to exclude those.
 # -------------------------------------------------------------------------
-metadata_to_plot <- vector("list", length = 11)
+metadata_to_plot <- vector("list", length = 10)
 names(metadata_to_plot) <- c(
-  "seurat_clusters", "Cell.Types", "Sample.ID", "SORT", "donor_id", "Braak",
+  "Cell.Types", "Sample.ID", "SORT", "donor_id", "Braak",
   "Amyloid", "Age", "sex", "RIN", "PMI"
 )
 metadata_to_plot$Sample.ID <- "no_label"
@@ -124,7 +124,8 @@ metadata_to_plot$PMI <- "no_label"
 
 # Cleaning
 
-We first read in the data and form a Seurat object.
+A Seurat object is already provided so we read it in.
+No QC is neccessary as it was already applied by the authors.
 
 ```{r}
 seurat <- readRDS(file.path(data_dir, "excitatory.rds"))
@@ -134,17 +135,23 @@ seurat
 
 # Cluster Pipeline
 
-We run a pipeline that applies normalisation and scaling, dimensionality reduction, and clustering.
+Since a clustering and normalisation pipeline was already run by the authors, we just create visualisations here.
 
 ```{r}
-sub_name <- "prep"
-seurat <- cluster_pipeline(
-  seurat, cache_dir = cache_dir,
-  sub_name = sub_name, protocol = protocol,
-  vars_to_regress = vars_to_regress, parallel_override = parallel_override,
-  cc = FALSE, res_divider = 100000
-)
-seurat
+add_df <- data.frame(Embeddings(seurat)[ , 1:2])
+names(add_df) <- paste0("pca", seq(ncol(add_df)))
+seurat$pca1 <- add_df$pca1
+seurat$pca2 <- add_df$pca2
+
+add_df <- data.frame(Embeddings(seurat, "umap"))
+names(add_df) <- paste0("umap", seq(ncol(add_df)))
+seurat$umap1 <- add_df$umap1
+seurat$umap2 <- add_df$umap2
+
+rds <- file.path(cache_dir, "seurat_prep.rds")
+if (!file.exists(rds)) {
+  saveRDS(seurat, file = rds)
+}
 
 for (i in seq_along(metadata_to_plot)) {
   if (
