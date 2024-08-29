@@ -458,6 +458,16 @@ for (i in seq_along(seurat_list)) {
   deg_list[[i]] <- read.delim(file.path(cache_dir, "results.tsv"))
 }
 
+results <- rbind(
+  gse_list[[1]], deg_list[[1]], gse_list[[2]], deg_list[[2]],
+  gse_list[[3]], deg_list[[3]], gse_list[[4]], deg_list[[4]],
+  gse_list[[5]], deg_list[[5]]
+)
+
+corrections <- data.frame(mean = results[ , 2], p = results[ , 6])
+corrections <- ihw(p ~ mean,  data = corrections, alpha = 0.05)
+corrections <- adj_pvalues(corrections)
+
 rds <- file.path(cache_dir, "gse_data.rds")
 if (!file.exists(rds)) {
   saveRDS(gse_data, file = rds)
@@ -473,6 +483,10 @@ if (!file.exists(rds)) {
 rds <- file.path(cache_dir, "deg_list.rds")
 if (!file.exists(rds)) {
   saveRDS(deg_list, file = rds)
+}
+rds <- file.path(cache_dir, "corrections.rds")
+if (!file.exists(rds)) {
+  saveRDS(corrections, file = rds)
 }
 ```
 
