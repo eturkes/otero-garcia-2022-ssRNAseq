@@ -33,6 +33,7 @@ RUN apt-get update \
         -e "install.packages('viridis')" \
         -e "install.packages('DT')" \
         -e "install.packages('hdf5r')" \
+        -e "install.packages('flexdashboard')" \
         -e "install.packages('BiocManager')" \
         -e "BiocManager::install('glmGamPoi')" \
         -e "BiocManager::install('GSEABase')" \
