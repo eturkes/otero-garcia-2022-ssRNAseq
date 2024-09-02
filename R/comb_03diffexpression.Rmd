@@ -117,6 +117,7 @@ gse_data <- readRDS(file.path(cache_dir, "..", "step02", "gse_data.rds"))
 deg_data <- readRDS(file.path(cache_dir, "..", "step02", "deg_data.rds"))
 gse_list <- readRDS(file.path(cache_dir, "..", "step02", "gse_list.rds"))
 deg_list <- readRDS(file.path(cache_dir, "..", "step02", "deg_list.rds"))
+corrections <- readRDS(file.path(cache_dir, "..", "step02", "corrections.rds"))
 
 map <- setNames(gene_anno$symbol, gene_anno$ensembl)
 
