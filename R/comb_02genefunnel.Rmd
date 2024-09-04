@@ -407,7 +407,7 @@ for (i in seq_along(seurat_list)) {
 
   deg <- deg[rownames(deg) %in% rownames(dge)]
   logcounts(deg, withDimnames = FALSE) <- cpm(
-    dge, log = TRUE, prior.count = 4
+    dge, log = TRUE, prior.count = 3
   )
   deg_data[[i]] <- deg
 
