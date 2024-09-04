@@ -285,7 +285,10 @@ if (file.exists(rds)) {
   rm(gene_sets_ordered)
   saveRDS(gene_sets_keep, file = rds)
 }
-gene_sets[names(gene_sets) %in% names(gene_sets_keep)]
+
+gene_sets_sub <- gene_sets[names(gene_sets) %in% names(gene_sets_keep)]
+gene_sets_sub
+gene_sets_sub <- unique(unlist(geneIds(gene_sets_sub)))
 
 gene_anno <- data.frame(
   symbol = unlist(seurat_orig@misc), ensembl = rownames(seurat_orig)
@@ -344,20 +347,8 @@ deg_list <- vector("list", length = 5)
 
 for (i in seq_along(seurat_list)) {
 
-  seurat_sub <- subset(
-    seurat_list[[i]], downsample = min(table(seurat_list[[i]]$Sample.ID))
-  )
-
   gse <- as.SingleCellExperiment(seurat_list[[i]], assay = "GF")
-  keep <- filterByExpr(
-    GetAssayData(seurat_sub, assay = "GF", layer = "counts"),
-    group = seurat_sub$tau,
-    min.prop = 0.2,
-    min.count = 1,
-    min.total.count = 1.5,
-    large.n = 0
-  )
-  gse <- gse[keep, ]
+  gse <- gse[rownames(gse) %in% names(gene_sets_keep), ]
   gse <- suppressWarnings(
     aggregateAcrossCells(
       gse, colData(gse)[ , "Sample.ID"],
@@ -367,15 +358,7 @@ for (i in seq_along(seurat_list)) {
   gse <- gse[ , order(gse$tau)]
 
   deg <- as.SingleCellExperiment(seurat_list[[i]], assay = "RNA")
-  keep <- filterByExpr(
-    GetAssayData(seurat_sub, assay = "RNA", layer = "counts"),
-    group = seurat_sub$tau,
-    min.prop = 0.01,
-    min.count = 1,
-    min.total.count = 1.5,
-    large.n = 0
-  )
-  deg <- deg[keep, ]
+  deg <- deg[rownames(deg) %in% gene_sets_sub, ]
   deg <- suppressWarnings(
     aggregateAcrossCells(
       deg, colData(deg)[ , "Sample.ID"],
@@ -384,47 +367,48 @@ for (i in seq_along(seurat_list)) {
   )
   deg <- deg[ , order(deg$tau)]
 
-  dge <- DGEList(counts(gse))
+  dge_orig <- DGEList(counts(gse))
   keep <- filterByExpr(
-    dge, group = gse$tau,
-    min.count = 200, min.total.count = 300
+    dge_orig, group = gse$tau,
+    min.count = 10, min.total.count = 15
   )
-  dge <- dge[keep, ]
-  dge <- calcNormFactors(dge)
+  dge_orig <- dge_orig[keep, ]
+  dge_orig <- calcNormFactors(dge_orig)
+  dge <- DGEList(counts(gse))
+  dge$samples$norm.factors <- dge_orig$samples$norm.factors
   keep <- filterByExpr(
     dge, group = gse$tau,
     min.count = 200, min.total.count = 300
   )
   dge <- dge[keep, , keep.lib.sizes = FALSE]
+  dge <- calcNormFactors(dge)
 
   gse <- gse[rownames(gse) %in% rownames(dge)]
   logcounts(gse, withDimnames = FALSE) <- cpm(
-    dge, log = TRUE, prior.count = 0.2
+    dge, log = TRUE, prior.count = 0.25
   )
-
-  gse <- gse[rownames(gse) %in% names(gene_sets_keep), ]
   gse_data[[i]] <- gse
 
+  dge_orig <- DGEList(counts(deg))
+  keep <- filterByExpr(
+    dge_orig, group = deg$tau,
+    min.count = 10, min.total.count = 15
+  )
+  dge_orig <- dge_orig[keep, ]
+  dge_orig <- calcNormFactors(dge_orig)
   dge <- DGEList(counts(deg))
+  dge$samples$norm.factors <- dge_orig$samples$norm.factors
   keep <- filterByExpr(
     dge, group = deg$tau,
-    min.count = 10, min.total.count = 15
-  )
-  dge <- dge[keep, ]
-  dge <- calcNormFactors(dge)
-  keep <- filterByExpr(
-    dge, group = gse$tau,
-    min.count = 10, min.total.count = 15
+    min.count = 5, min.total.count = 7.5
   )
   dge <- dge[keep, , keep.lib.sizes = FALSE]
+  dge <- calcNormFactors(dge)
 
   deg <- deg[rownames(deg) %in% rownames(dge)]
   logcounts(deg, withDimnames = FALSE) <- cpm(
-    dge, log = TRUE, prior.count = 10
+    dge, log = TRUE, prior.count = 4
   )
-
-  gene_sets_sub <- gene_sets[names(gene_sets) %in% rownames(gse)]
-  deg <- deg[rownames(deg) %in% unique(unlist(geneIds(gene_sets_sub))), ]
   deg_data[[i]] <- deg
 
   design <- model.matrix(~ 0 + gse$tau + gse$donor_id)
