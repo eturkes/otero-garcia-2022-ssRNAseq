@@ -506,16 +506,10 @@ renderPlot(
       mat <- mat[match(rownames(sig_tmp), rownames(mat)), ]
     }
 
-    mat <- t(
-      apply(
-        mat, MARGIN = 1,
-        FUN = function (x) ((2 * (x - min(x)) / (max(x) - min(x))) - 1)
-      )
-    )
     draw(
       Heatmap(
         mat,
-        col = colorRamp2(c(-1, 0, 1), colors = c("blue", "white", "red")),
+        col = colorRamp2(gse_range[[idx]], colors = c("blue", "white", "red")),
         column_title = ctype_name[[idx]],
         cluster_columns = FALSE,
         cluster_rows = FALSE,
@@ -532,7 +526,7 @@ renderPlot(
           grid.text(sig_tmp[i, j], x = x, y = y, gp = gpar(fontsize = 8))
         },
         heatmap_legend_param = list(
-          title = "Scaled logGSE", direction = "horizontal",
+          title = "logGSE", direction = "horizontal",
           title_position = "topcenter", labels_gp = gpar(fontsize = 8),
           grid_height = unit(2, "mm"), title_gp = gpar(fontsize = 10)
         )
@@ -1194,16 +1188,10 @@ renderPlot(
       mat <- mat[match(rownames(sig_tmp), rownames(mat)), ]
     }
 
-    mat <- t(
-      apply(
-        mat, MARGIN = 1,
-        FUN = function (x) ((2 * (x - min(x)) / (max(x) - min(x))) - 1)
-      )
-    )
     draw(
       Heatmap(
         mat,
-        col = colorRamp2(c(-1, 0, 1), colors = c("blue", "white", "red")),
+        col = colorRamp2(gse_range[[idx]], colors = c("blue", "white", "red")),
         column_title = ctype_name[[idx]],
         cluster_columns = FALSE,
         cluster_rows = FALSE,
@@ -1220,7 +1208,7 @@ renderPlot(
           grid.text(sig_tmp[i, j], x = x, y = y, gp = gpar(fontsize = 8))
         },
         heatmap_legend_param = list(
-          title = "Scaled logGSE", direction = "horizontal",
+          title = "logGSE", direction = "horizontal",
           title_position = "topcenter", labels_gp = gpar(fontsize = 8),
           grid_height = unit(2, "mm"), title_gp = gpar(fontsize = 10)
         )
@@ -1885,16 +1873,10 @@ renderPlot(
       mat <- mat[match(rownames(sig_tmp), rownames(mat)), ]
     }
 
-    mat <- t(
-      apply(
-        mat, MARGIN = 1,
-        FUN = function (x) ((2 * (x - min(x)) / (max(x) - min(x))) - 1)
-      )
-    )
     draw(
       Heatmap(
         mat,
-        col = colorRamp2(c(-1, 0, 1), colors = c("blue", "white", "red")),
+        col = colorRamp2(gse_range[[idx]], colors = c("blue", "white", "red")),
         column_title = ctype_name[[idx]],
         cluster_columns = FALSE,
         cluster_rows = FALSE,
@@ -1911,7 +1893,7 @@ renderPlot(
           grid.text(sig_tmp[i, j], x = x, y = y, gp = gpar(fontsize = 8))
         },
         heatmap_legend_param = list(
-          title = "Scaled logGSE", direction = "horizontal",
+          title = "logGSE", direction = "horizontal",
           title_position = "topcenter", labels_gp = gpar(fontsize = 8),
           grid_height = unit(2, "mm"), title_gp = gpar(fontsize = 10)
         )
@@ -2579,16 +2561,10 @@ renderPlot(
       mat <- mat[match(rownames(sig_tmp), rownames(mat)), ]
     }
 
-    mat <- t(
-      apply(
-        mat, MARGIN = 1,
-        FUN = function (x) ((2 * (x - min(x)) / (max(x) - min(x))) - 1)
-      )
-    )
     draw(
       Heatmap(
         mat,
-        col = colorRamp2(c(-1, 0, 1), colors = c("blue", "white", "red")),
+        col = colorRamp2(gse_range[[idx]], colors = c("blue", "white", "red")),
         column_title = ctype_name[[idx]],
         cluster_columns = FALSE,
         cluster_rows = FALSE,
@@ -2605,7 +2581,7 @@ renderPlot(
           grid.text(sig_tmp[i, j], x = x, y = y, gp = gpar(fontsize = 8))
         },
         heatmap_legend_param = list(
-          title = "Scaled logGSE", direction = "horizontal",
+          title = "logGSE", direction = "horizontal",
           title_position = "topcenter", labels_gp = gpar(fontsize = 8),
           grid_height = unit(2, "mm"), title_gp = gpar(fontsize = 10)
         )
@@ -3275,16 +3251,10 @@ renderPlot(
       mat <- mat[match(rownames(sig_tmp), rownames(mat)), ]
     }
 
-    mat <- t(
-      apply(
-        mat, MARGIN = 1,
-        FUN = function (x) ((2 * (x - min(x)) / (max(x) - min(x))) - 1)
-      )
-    )
     draw(
       Heatmap(
         mat,
-        col = colorRamp2(c(-1, 0, 1), colors = c("blue", "white", "red")),
+        col = colorRamp2(gse_range[[idx]], colors = c("blue", "white", "red")),
         column_title = ctype_name[[idx]],
         cluster_columns = FALSE,
         cluster_rows = FALSE,
@@ -3301,7 +3271,7 @@ renderPlot(
           grid.text(sig_tmp[i, j], x = x, y = y, gp = gpar(fontsize = 8))
         },
         heatmap_legend_param = list(
-          title = "Scaled logGSE", direction = "horizontal",
+          title = "logGSE", direction = "horizontal",
           title_position = "topcenter", labels_gp = gpar(fontsize = 8),
           grid_height = unit(2, "mm"), title_gp = gpar(fontsize = 10)
         )
