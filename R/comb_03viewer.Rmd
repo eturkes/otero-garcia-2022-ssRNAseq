@@ -776,8 +776,9 @@ renderSankeyNetwork(
   {
     idx <- 1
 
-    select_length <- length(input[[paste0("deg_conn", idx)]])
-    links_list <- vector("list", length = select_length)
+    links_list <- vector(
+      "list", length = length(input[[paste0("deg_conn", idx)]])
+    )
     for (i in seq_along(input[[paste0("deg_conn", idx)]])) {
       if (
         results_deg[[idx]][
@@ -818,22 +819,27 @@ renderSankeyNetwork(
     )
     links_comb$IDsource <- match(links_comb$source, nodes$name) - 1
     links_comb$IDtarget <- match(links_comb$target, nodes$name) - 1
-    nodes$group <- c(
-      rep("target", times = nrow(nodes) - select_length),
-      nodes$name[(nrow(nodes) - (select_length - 1)):nrow(nodes)]
-    )
 
-    colour <- c(hue_pal()(length(input[[paste0("deg_conn", idx)]])), "#D3D3D3")
-    colour <- paste0(
-      'd3.scaleOrdinal().range(["', paste(colour, collapse = '", "'), '"])'
-    )
+    if (nrow(nodes) > 0) {
+      select_length <- length(
+        which(input[[paste0("deg_conn", idx)]] %in% nodes$name)
+      )
+      nodes$group <- c(
+        rep("target", times = nrow(nodes) - select_length),
+        nodes$name[(nrow(nodes) - (select_length - 1)):nrow(nodes)]
+      )
+      colour <- c(hue_pal()(select_length), "#D3D3D3")
+      colour <- paste0(
+        'd3.scaleOrdinal().range(["', paste(colour, collapse = '", "'), '"])'
+      )
 
-    sankeyNetwork(
-      Links = links_comb, Nodes = nodes, Source = "IDsource",
-      Target = "IDtarget", Value = "value", NodeID = "name",
-      sinksRight = FALSE, fontSize = 20, NodeGroup = "group",
-      LinkGroup = "target", colourScale = colour, margin = list(bottom = 100)
-    )
+      sankeyNetwork(
+        Links = links_comb, Nodes = nodes, Source = "IDsource",
+        Target = "IDtarget", Value = "value", NodeID = "name",
+        sinksRight = FALSE, fontSize = 20, NodeGroup = "group",
+        LinkGroup = "target", colourScale = colour, margin = list(bottom = 100)
+      )
+    }
   }
 )
 ```
@@ -1458,8 +1464,9 @@ renderSankeyNetwork(
   {
     idx <- 2
 
-    select_length <- length(input[[paste0("deg_conn", idx)]])
-    links_list <- vector("list", length = select_length)
+    links_list <- vector(
+      "list", length = length(input[[paste0("deg_conn", idx)]])
+    )
     for (i in seq_along(input[[paste0("deg_conn", idx)]])) {
       if (
         results_deg[[idx]][
@@ -1500,22 +1507,27 @@ renderSankeyNetwork(
     )
     links_comb$IDsource <- match(links_comb$source, nodes$name) - 1
     links_comb$IDtarget <- match(links_comb$target, nodes$name) - 1
-    nodes$group <- c(
-      rep("target", times = nrow(nodes) - select_length),
-      nodes$name[(nrow(nodes) - (select_length - 1)):nrow(nodes)]
-    )
 
-    colour <- c(hue_pal()(length(input[[paste0("deg_conn", idx)]])), "#D3D3D3")
-    colour <- paste0(
-      'd3.scaleOrdinal().range(["', paste(colour, collapse = '", "'), '"])'
-    )
+    if (nrow(nodes) > 0) {
+      select_length <- length(
+        which(input[[paste0("deg_conn", idx)]] %in% nodes$name)
+      )
+      nodes$group <- c(
+        rep("target", times = nrow(nodes) - select_length),
+        nodes$name[(nrow(nodes) - (select_length - 1)):nrow(nodes)]
+      )
+      colour <- c(hue_pal()(select_length), "#D3D3D3")
+      colour <- paste0(
+        'd3.scaleOrdinal().range(["', paste(colour, collapse = '", "'), '"])'
+      )
 
-    sankeyNetwork(
-      Links = links_comb, Nodes = nodes, Source = "IDsource",
-      Target = "IDtarget", Value = "value", NodeID = "name",
-      sinksRight = FALSE, fontSize = 20, NodeGroup = "group",
-      LinkGroup = "target", colourScale = colour, margin = list(bottom = 100)
-    )
+      sankeyNetwork(
+        Links = links_comb, Nodes = nodes, Source = "IDsource",
+        Target = "IDtarget", Value = "value", NodeID = "name",
+        sinksRight = FALSE, fontSize = 20, NodeGroup = "group",
+        LinkGroup = "target", colourScale = colour, margin = list(bottom = 100)
+      )
+    }
   }
 )
 ```
@@ -2143,8 +2155,9 @@ renderSankeyNetwork(
   {
     idx <- 3
 
-    select_length <- length(input[[paste0("deg_conn", idx)]])
-    links_list <- vector("list", length = select_length)
+    links_list <- vector(
+      "list", length = length(input[[paste0("deg_conn", idx)]])
+    )
     for (i in seq_along(input[[paste0("deg_conn", idx)]])) {
       if (
         results_deg[[idx]][
@@ -2185,22 +2198,27 @@ renderSankeyNetwork(
     )
     links_comb$IDsource <- match(links_comb$source, nodes$name) - 1
     links_comb$IDtarget <- match(links_comb$target, nodes$name) - 1
-    nodes$group <- c(
-      rep("target", times = nrow(nodes) - select_length),
-      nodes$name[(nrow(nodes) - (select_length - 1)):nrow(nodes)]
-    )
 
-    colour <- c(hue_pal()(length(input[[paste0("deg_conn", idx)]])), "#D3D3D3")
-    colour <- paste0(
-      'd3.scaleOrdinal().range(["', paste(colour, collapse = '", "'), '"])'
-    )
+    if (nrow(nodes) > 0) {
+      select_length <- length(
+        which(input[[paste0("deg_conn", idx)]] %in% nodes$name)
+      )
+      nodes$group <- c(
+        rep("target", times = nrow(nodes) - select_length),
+        nodes$name[(nrow(nodes) - (select_length - 1)):nrow(nodes)]
+      )
+      colour <- c(hue_pal()(select_length), "#D3D3D3")
+      colour <- paste0(
+        'd3.scaleOrdinal().range(["', paste(colour, collapse = '", "'), '"])'
+      )
 
-    sankeyNetwork(
-      Links = links_comb, Nodes = nodes, Source = "IDsource",
-      Target = "IDtarget", Value = "value", NodeID = "name",
-      sinksRight = FALSE, fontSize = 20, NodeGroup = "group",
-      LinkGroup = "target", colourScale = colour, margin = list(bottom = 100)
-    )
+      sankeyNetwork(
+        Links = links_comb, Nodes = nodes, Source = "IDsource",
+        Target = "IDtarget", Value = "value", NodeID = "name",
+        sinksRight = FALSE, fontSize = 20, NodeGroup = "group",
+        LinkGroup = "target", colourScale = colour, margin = list(bottom = 100)
+      )
+    }
   }
 )
 ```
@@ -2831,8 +2849,9 @@ renderSankeyNetwork(
   {
     idx <- 4
 
-    select_length <- length(input[[paste0("deg_conn", idx)]])
-    links_list <- vector("list", length = select_length)
+    links_list <- vector(
+      "list", length = length(input[[paste0("deg_conn", idx)]])
+    )
     for (i in seq_along(input[[paste0("deg_conn", idx)]])) {
       if (
         results_deg[[idx]][
@@ -2873,22 +2892,27 @@ renderSankeyNetwork(
     )
     links_comb$IDsource <- match(links_comb$source, nodes$name) - 1
     links_comb$IDtarget <- match(links_comb$target, nodes$name) - 1
-    nodes$group <- c(
-      rep("target", times = nrow(nodes) - select_length),
-      nodes$name[(nrow(nodes) - (select_length - 1)):nrow(nodes)]
-    )
 
-    colour <- c(hue_pal()(length(input[[paste0("deg_conn", idx)]])), "#D3D3D3")
-    colour <- paste0(
-      'd3.scaleOrdinal().range(["', paste(colour, collapse = '", "'), '"])'
-    )
+    if (nrow(nodes) > 0) {
+      select_length <- length(
+        which(input[[paste0("deg_conn", idx)]] %in% nodes$name)
+      )
+      nodes$group <- c(
+        rep("target", times = nrow(nodes) - select_length),
+        nodes$name[(nrow(nodes) - (select_length - 1)):nrow(nodes)]
+      )
+      colour <- c(hue_pal()(select_length), "#D3D3D3")
+      colour <- paste0(
+        'd3.scaleOrdinal().range(["', paste(colour, collapse = '", "'), '"])'
+      )
 
-    sankeyNetwork(
-      Links = links_comb, Nodes = nodes, Source = "IDsource",
-      Target = "IDtarget", Value = "value", NodeID = "name",
-      sinksRight = FALSE, fontSize = 20, NodeGroup = "group",
-      LinkGroup = "target", colourScale = colour, margin = list(bottom = 100)
-    )
+      sankeyNetwork(
+        Links = links_comb, Nodes = nodes, Source = "IDsource",
+        Target = "IDtarget", Value = "value", NodeID = "name",
+        sinksRight = FALSE, fontSize = 20, NodeGroup = "group",
+        LinkGroup = "target", colourScale = colour, margin = list(bottom = 100)
+      )
+    }
   }
 )
 ```
@@ -3521,8 +3545,9 @@ renderSankeyNetwork(
   {
     idx <- 5
 
-    select_length <- length(input[[paste0("deg_conn", idx)]])
-    links_list <- vector("list", length = select_length)
+    links_list <- vector(
+      "list", length = length(input[[paste0("deg_conn", idx)]])
+    )
     for (i in seq_along(input[[paste0("deg_conn", idx)]])) {
       if (
         results_deg[[idx]][
@@ -3563,22 +3588,27 @@ renderSankeyNetwork(
     )
     links_comb$IDsource <- match(links_comb$source, nodes$name) - 1
     links_comb$IDtarget <- match(links_comb$target, nodes$name) - 1
-    nodes$group <- c(
-      rep("target", times = nrow(nodes) - select_length),
-      nodes$name[(nrow(nodes) - (select_length - 1)):nrow(nodes)]
-    )
 
-    colour <- c(hue_pal()(length(input[[paste0("deg_conn", idx)]])), "#D3D3D3")
-    colour <- paste0(
-      'd3.scaleOrdinal().range(["', paste(colour, collapse = '", "'), '"])'
-    )
+    if (nrow(nodes) > 0) {
+      select_length <- length(
+        which(input[[paste0("deg_conn", idx)]] %in% nodes$name)
+      )
+      nodes$group <- c(
+        rep("target", times = nrow(nodes) - select_length),
+        nodes$name[(nrow(nodes) - (select_length - 1)):nrow(nodes)]
+      )
+      colour <- c(hue_pal()(select_length), "#D3D3D3")
+      colour <- paste0(
+        'd3.scaleOrdinal().range(["', paste(colour, collapse = '", "'), '"])'
+      )
 
-    sankeyNetwork(
-      Links = links_comb, Nodes = nodes, Source = "IDsource",
-      Target = "IDtarget", Value = "value", NodeID = "name",
-      sinksRight = FALSE, fontSize = 20, NodeGroup = "group",
-      LinkGroup = "target", colourScale = colour, margin = list(bottom = 100)
-    )
+      sankeyNetwork(
+        Links = links_comb, Nodes = nodes, Source = "IDsource",
+        Target = "IDtarget", Value = "value", NodeID = "name",
+        sinksRight = FALSE, fontSize = 20, NodeGroup = "group",
+        LinkGroup = "target", colourScale = colour, margin = list(bottom = 100)
+      )
+    }
   }
 )
 ```
