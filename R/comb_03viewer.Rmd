@@ -26,9 +26,10 @@ runtime: shiny
 #    Emir Turkes can be contacted at emir.turkes@eturkes.com
 
 library(conflicted)
+conflicts_prefer(DT::JS)
 packages <- c(
   "GSEABase", "SingleCellExperiment", "scales", "ComplexHeatmap", "circlize",
-  "limma", "DT"
+  "limma", "DT", "purrr", "dplyr", "ggplot2", "ggsankey"
 )
 lapply(packages, FUN = library, character.only = TRUE)
 
@@ -92,6 +93,8 @@ gse_data <- readRDS(file.path(data_dir, "gse_data.rds"))
 deg_list <- readRDS(file.path(data_dir, "deg_list.rds"))
 gse_list <- readRDS(file.path(data_dir, "gse_list.rds"))
 corrections <- readRDS(file.path(data_dir, "corrections.rds"))
+
+map <- setNames(gene_anno$symbol, gene_anno$ensembl)
 
 ctypes <- list(
   "Ex01_CUX2-LAMP5 (L2-L3)", "Ex02_CUX2-COL5A2 (L2-L4)",
@@ -757,6 +760,107 @@ renderPlot(
 </div>
 </div>
 
+### Gene Connectivity
+
+```{r}
+selectizeInput(
+  paste0("deg_conn", idx),
+  label = "Select Genes:",
+  choices = results_deg[[idx]]$Gene,
+  selected = rownames(sig_uniq_deg[[idx]])[1:2],
+  multiple = TRUE,
+  width = "100%"
+)
+```
+
+<div style='display:flex; flex-direction:row; justify-content:space-evenly;'>
+<div>
+
+```{r}
+renderPlot(
+  {
+    idx <- 1
+
+    links_list <- vector(
+      "list", length = length(input[[paste0("deg_conn", idx)]])
+    )
+    for (i in seq_along(input[[paste0("deg_conn", idx)]])) {
+      if (
+        results_deg[[idx]][
+          results_deg[[idx]]$Gene %in% input[[paste0("deg_conn", idx)]][i],
+        ]$Coef > 0
+      ) {
+        gse_sub <- results_gse[[idx]][
+          results_gse[[idx]]$Coef > 0 & results_gse[[idx]]$P.value.adj < 0.05,
+        ]
+        gene_ids <- geneIds(gene_sets)[names(gene_sets) %in% gse_sub$GeneSet]
+        # gene_ids <- gene_ids[match(gse_sub$GeneSet, names(gene_ids))]
+        gene_ids <- gene_ids[order(names(gene_ids))]
+      } else {
+        gse_sub <- results_gse[[idx]][
+          results_gse[[idx]]$Coef < 0 & results_gse[[idx]]$P.value.adj < 0.05,
+        ]
+        gene_ids <- geneIds(gene_sets)[names(gene_sets) %in% gse_sub$GeneSet]
+        # gene_ids <- gene_ids[match(gse_sub$GeneSet, names(gene_ids))]
+        gene_ids <- gene_ids[order(names(gene_ids))]
+      }
+
+      links_orig <- data.frame(
+        source = rep(names(gene_ids), times = lengths(gene_ids)),
+        target = gene_ids %>% map_dfr(as_tibble)
+      )
+      links <- links_orig
+      links_orig[] <- map[unlist(links_orig)]
+      links$value <- links_orig$value
+      colnames(links) <- c("source", "target")
+      links <- links[links$target %in% input[[paste0("deg_conn", idx)]][i], ]
+      links$value <- rep(1, times = nrow(links))
+      links_list[[i]] <- links
+    }
+
+    links_comb <- do.call(rbind, args = links_list)
+    links_comb <- make_long(links_comb, source, target)
+    links_comb$node <- factor(
+      links_comb$node, levels = rev(unique(links_comb$node))
+    )
+
+    key <- unique(links_comb$node[links_comb$x == "target"])
+    value <- hue_pal()(length(key))
+    col_map <- setNames(value, key)
+    links_comb$fill <- unfactor(links_comb$node)
+    links_comb$fill <- ifelse(
+      links_comb$x == "target", yes = col_map[links_comb$fill],
+      no = links_comb$fill
+    )
+    for (i in seq(2, nrow(links_comb), by = 2)) {
+      links_comb$fill[i - 1] <- links_comb$fill[i]
+    }
+    links_comb$node_fill <- ifelse(
+      links_comb$x == "target", yes = links_comb$fill, no = "lightgray"
+    )
+
+    ggplot(
+      links_comb,
+      aes(
+        x = x, next_x = next_x,
+        node = node, next_node = next_node,
+        label = node, fill = fill
+      )
+    ) +
+      geom_sankey(flow.alpha = 0.5, show.legend = FALSE) +
+      geom_sankey_label(size = 2) +
+      scale_fill_identity() +
+      theme_void()
+  },
+  width = 1400,
+  height = 600,
+  res = 150
+)
+```
+
+</div>
+</div>
+
 Ex02_CUX2-COL5A2 (L2-L4)
 ===
 
@@ -1355,6 +1459,107 @@ renderPlot(
   width = 750,
   height = 500,
   res = 96
+)
+```
+
+</div>
+</div>
+
+### Gene Connectivity
+
+```{r}
+selectizeInput(
+  paste0("deg_conn", idx),
+  label = "Select Genes:",
+  choices = results_deg[[idx]]$Gene,
+  selected = rownames(sig_uniq_deg[[idx]])[1:2],
+  multiple = TRUE,
+  width = "100%"
+)
+```
+
+<div style='display:flex; flex-direction:row; justify-content:space-evenly;'>
+<div>
+
+```{r}
+renderPlot(
+  {
+    idx <- 2
+
+    links_list <- vector(
+      "list", length = length(input[[paste0("deg_conn", idx)]])
+    )
+    for (i in seq_along(input[[paste0("deg_conn", idx)]])) {
+      if (
+        results_deg[[idx]][
+          results_deg[[idx]]$Gene %in% input[[paste0("deg_conn", idx)]][i],
+        ]$Coef > 0
+      ) {
+        gse_sub <- results_gse[[idx]][
+          results_gse[[idx]]$Coef > 0 & results_gse[[idx]]$P.value.adj < 0.05,
+        ]
+        gene_ids <- geneIds(gene_sets)[names(gene_sets) %in% gse_sub$GeneSet]
+        # gene_ids <- gene_ids[match(gse_sub$GeneSet, names(gene_ids))]
+        gene_ids <- gene_ids[order(names(gene_ids))]
+      } else {
+        gse_sub <- results_gse[[idx]][
+          results_gse[[idx]]$Coef < 0 & results_gse[[idx]]$P.value.adj < 0.05,
+        ]
+        gene_ids <- geneIds(gene_sets)[names(gene_sets) %in% gse_sub$GeneSet]
+        # gene_ids <- gene_ids[match(gse_sub$GeneSet, names(gene_ids))]
+        gene_ids <- gene_ids[order(names(gene_ids))]
+      }
+
+      links_orig <- data.frame(
+        source = rep(names(gene_ids), times = lengths(gene_ids)),
+        target = gene_ids %>% map_dfr(as_tibble)
+      )
+      links <- links_orig
+      links_orig[] <- map[unlist(links_orig)]
+      links$value <- links_orig$value
+      colnames(links) <- c("source", "target")
+      links <- links[links$target %in% input[[paste0("deg_conn", idx)]][i], ]
+      links$value <- rep(1, times = nrow(links))
+      links_list[[i]] <- links
+    }
+
+    links_comb <- do.call(rbind, args = links_list)
+    links_comb <- make_long(links_comb, source, target)
+    links_comb$node <- factor(
+      links_comb$node, levels = rev(unique(links_comb$node))
+    )
+
+    key <- unique(links_comb$node[links_comb$x == "target"])
+    value <- hue_pal()(length(key))
+    col_map <- setNames(value, key)
+    links_comb$fill <- unfactor(links_comb$node)
+    links_comb$fill <- ifelse(
+      links_comb$x == "target", yes = col_map[links_comb$fill],
+      no = links_comb$fill
+    )
+    for (i in seq(2, nrow(links_comb), by = 2)) {
+      links_comb$fill[i - 1] <- links_comb$fill[i]
+    }
+    links_comb$node_fill <- ifelse(
+      links_comb$x == "target", yes = links_comb$fill, no = "lightgray"
+    )
+
+    ggplot(
+      links_comb,
+      aes(
+        x = x, next_x = next_x,
+        node = node, next_node = next_node,
+        label = node, fill = fill
+      )
+    ) +
+      geom_sankey(flow.alpha = 0.5, show.legend = FALSE) +
+      geom_sankey_label(size = 2) +
+      scale_fill_identity() +
+      theme_void()
+  },
+  width = 1400,
+  height = 600,
+  res = 150
 )
 ```
 
@@ -1962,6 +2167,107 @@ renderPlot(
   width = 750,
   height = 500,
   res = 96
+)
+```
+
+</div>
+</div>
+
+### Gene Connectivity
+
+```{r}
+selectizeInput(
+  paste0("deg_conn", idx),
+  label = "Select Genes:",
+  choices = results_deg[[idx]]$Gene,
+  selected = rownames(sig_uniq_deg[[idx]])[1:2],
+  multiple = TRUE,
+  width = "100%"
+)
+```
+
+<div style='display:flex; flex-direction:row; justify-content:space-evenly;'>
+<div>
+
+```{r}
+renderPlot(
+  {
+    idx <- 3
+
+    links_list <- vector(
+      "list", length = length(input[[paste0("deg_conn", idx)]])
+    )
+    for (i in seq_along(input[[paste0("deg_conn", idx)]])) {
+      if (
+        results_deg[[idx]][
+          results_deg[[idx]]$Gene %in% input[[paste0("deg_conn", idx)]][i],
+        ]$Coef > 0
+      ) {
+        gse_sub <- results_gse[[idx]][
+          results_gse[[idx]]$Coef > 0 & results_gse[[idx]]$P.value.adj < 0.05,
+        ]
+        gene_ids <- geneIds(gene_sets)[names(gene_sets) %in% gse_sub$GeneSet]
+        # gene_ids <- gene_ids[match(gse_sub$GeneSet, names(gene_ids))]
+        gene_ids <- gene_ids[order(names(gene_ids))]
+      } else {
+        gse_sub <- results_gse[[idx]][
+          results_gse[[idx]]$Coef < 0 & results_gse[[idx]]$P.value.adj < 0.05,
+        ]
+        gene_ids <- geneIds(gene_sets)[names(gene_sets) %in% gse_sub$GeneSet]
+        # gene_ids <- gene_ids[match(gse_sub$GeneSet, names(gene_ids))]
+        gene_ids <- gene_ids[order(names(gene_ids))]
+      }
+
+      links_orig <- data.frame(
+        source = rep(names(gene_ids), times = lengths(gene_ids)),
+        target = gene_ids %>% map_dfr(as_tibble)
+      )
+      links <- links_orig
+      links_orig[] <- map[unlist(links_orig)]
+      links$value <- links_orig$value
+      colnames(links) <- c("source", "target")
+      links <- links[links$target %in% input[[paste0("deg_conn", idx)]][i], ]
+      links$value <- rep(1, times = nrow(links))
+      links_list[[i]] <- links
+    }
+
+    links_comb <- do.call(rbind, args = links_list)
+    links_comb <- make_long(links_comb, source, target)
+    links_comb$node <- factor(
+      links_comb$node, levels = rev(unique(links_comb$node))
+    )
+
+    key <- unique(links_comb$node[links_comb$x == "target"])
+    value <- hue_pal()(length(key))
+    col_map <- setNames(value, key)
+    links_comb$fill <- unfactor(links_comb$node)
+    links_comb$fill <- ifelse(
+      links_comb$x == "target", yes = col_map[links_comb$fill],
+      no = links_comb$fill
+    )
+    for (i in seq(2, nrow(links_comb), by = 2)) {
+      links_comb$fill[i - 1] <- links_comb$fill[i]
+    }
+    links_comb$node_fill <- ifelse(
+      links_comb$x == "target", yes = links_comb$fill, no = "lightgray"
+    )
+
+    ggplot(
+      links_comb,
+      aes(
+        x = x, next_x = next_x,
+        node = node, next_node = next_node,
+        label = node, fill = fill
+      )
+    ) +
+      geom_sankey(flow.alpha = 0.5, show.legend = FALSE) +
+      geom_sankey_label(size = 2) +
+      scale_fill_identity() +
+      theme_void()
+  },
+  width = 1400,
+  height = 600,
+  res = 150
 )
 ```
 
@@ -2578,6 +2884,107 @@ renderPlot(
 </div>
 </div>
 
+### Gene Connectivity
+
+```{r}
+selectizeInput(
+  paste0("deg_conn", idx),
+  label = "Select Genes:",
+  choices = results_deg[[idx]]$Gene,
+  selected = rownames(sig_uniq_deg[[idx]])[1:2],
+  multiple = TRUE,
+  width = "100%"
+)
+```
+
+<div style='display:flex; flex-direction:row; justify-content:space-evenly;'>
+<div>
+
+```{r}
+renderPlot(
+  {
+    idx <- 4
+
+    links_list <- vector(
+      "list", length = length(input[[paste0("deg_conn", idx)]])
+    )
+    for (i in seq_along(input[[paste0("deg_conn", idx)]])) {
+      if (
+        results_deg[[idx]][
+          results_deg[[idx]]$Gene %in% input[[paste0("deg_conn", idx)]][i],
+        ]$Coef > 0
+      ) {
+        gse_sub <- results_gse[[idx]][
+          results_gse[[idx]]$Coef > 0 & results_gse[[idx]]$P.value.adj < 0.05,
+        ]
+        gene_ids <- geneIds(gene_sets)[names(gene_sets) %in% gse_sub$GeneSet]
+        # gene_ids <- gene_ids[match(gse_sub$GeneSet, names(gene_ids))]
+        gene_ids <- gene_ids[order(names(gene_ids))]
+      } else {
+        gse_sub <- results_gse[[idx]][
+          results_gse[[idx]]$Coef < 0 & results_gse[[idx]]$P.value.adj < 0.05,
+        ]
+        gene_ids <- geneIds(gene_sets)[names(gene_sets) %in% gse_sub$GeneSet]
+        # gene_ids <- gene_ids[match(gse_sub$GeneSet, names(gene_ids))]
+        gene_ids <- gene_ids[order(names(gene_ids))]
+      }
+
+      links_orig <- data.frame(
+        source = rep(names(gene_ids), times = lengths(gene_ids)),
+        target = gene_ids %>% map_dfr(as_tibble)
+      )
+      links <- links_orig
+      links_orig[] <- map[unlist(links_orig)]
+      links$value <- links_orig$value
+      colnames(links) <- c("source", "target")
+      links <- links[links$target %in% input[[paste0("deg_conn", idx)]][i], ]
+      links$value <- rep(1, times = nrow(links))
+      links_list[[i]] <- links
+    }
+
+    links_comb <- do.call(rbind, args = links_list)
+    links_comb <- make_long(links_comb, source, target)
+    links_comb$node <- factor(
+      links_comb$node, levels = rev(unique(links_comb$node))
+    )
+
+    key <- unique(links_comb$node[links_comb$x == "target"])
+    value <- hue_pal()(length(key))
+    col_map <- setNames(value, key)
+    links_comb$fill <- unfactor(links_comb$node)
+    links_comb$fill <- ifelse(
+      links_comb$x == "target", yes = col_map[links_comb$fill],
+      no = links_comb$fill
+    )
+    for (i in seq(2, nrow(links_comb), by = 2)) {
+      links_comb$fill[i - 1] <- links_comb$fill[i]
+    }
+    links_comb$node_fill <- ifelse(
+      links_comb$x == "target", yes = links_comb$fill, no = "lightgray"
+    )
+
+    ggplot(
+      links_comb,
+      aes(
+        x = x, next_x = next_x,
+        node = node, next_node = next_node,
+        label = node, fill = fill
+      )
+    ) +
+      geom_sankey(flow.alpha = 0.5, show.legend = FALSE) +
+      geom_sankey_label(size = 2) +
+      scale_fill_identity() +
+      theme_void()
+  },
+  width = 1400,
+  height = 600,
+  res = 150
+)
+```
+
+</div>
+</div>
+
 Ex10_THEMIS (L5-6)
 ===
 
@@ -3184,6 +3591,107 @@ renderPlot(
   width = 750,
   height = 500,
   res = 96
+)
+```
+
+</div>
+</div>
+
+### Gene Connectivity
+
+```{r}
+selectizeInput(
+  paste0("deg_conn", idx),
+  label = "Select Genes:",
+  choices = results_deg[[idx]]$Gene,
+  selected = rownames(sig_uniq_deg[[idx]])[1:2],
+  multiple = TRUE,
+  width = "100%"
+)
+```
+
+<div style='display:flex; flex-direction:row; justify-content:space-evenly;'>
+<div>
+
+```{r}
+renderPlot(
+  {
+    idx <- 5
+
+    links_list <- vector(
+      "list", length = length(input[[paste0("deg_conn", idx)]])
+    )
+    for (i in seq_along(input[[paste0("deg_conn", idx)]])) {
+      if (
+        results_deg[[idx]][
+          results_deg[[idx]]$Gene %in% input[[paste0("deg_conn", idx)]][i],
+        ]$Coef > 0
+      ) {
+        gse_sub <- results_gse[[idx]][
+          results_gse[[idx]]$Coef > 0 & results_gse[[idx]]$P.value.adj < 0.05,
+        ]
+        gene_ids <- geneIds(gene_sets)[names(gene_sets) %in% gse_sub$GeneSet]
+        # gene_ids <- gene_ids[match(gse_sub$GeneSet, names(gene_ids))]
+        gene_ids <- gene_ids[order(names(gene_ids))]
+      } else {
+        gse_sub <- results_gse[[idx]][
+          results_gse[[idx]]$Coef < 0 & results_gse[[idx]]$P.value.adj < 0.05,
+        ]
+        gene_ids <- geneIds(gene_sets)[names(gene_sets) %in% gse_sub$GeneSet]
+        # gene_ids <- gene_ids[match(gse_sub$GeneSet, names(gene_ids))]
+        gene_ids <- gene_ids[order(names(gene_ids))]
+      }
+
+      links_orig <- data.frame(
+        source = rep(names(gene_ids), times = lengths(gene_ids)),
+        target = gene_ids %>% map_dfr(as_tibble)
+      )
+      links <- links_orig
+      links_orig[] <- map[unlist(links_orig)]
+      links$value <- links_orig$value
+      colnames(links) <- c("source", "target")
+      links <- links[links$target %in% input[[paste0("deg_conn", idx)]][i], ]
+      links$value <- rep(1, times = nrow(links))
+      links_list[[i]] <- links
+    }
+
+    links_comb <- do.call(rbind, args = links_list)
+    links_comb <- make_long(links_comb, source, target)
+    links_comb$node <- factor(
+      links_comb$node, levels = rev(unique(links_comb$node))
+    )
+
+    key <- unique(links_comb$node[links_comb$x == "target"])
+    value <- hue_pal()(length(key))
+    col_map <- setNames(value, key)
+    links_comb$fill <- unfactor(links_comb$node)
+    links_comb$fill <- ifelse(
+      links_comb$x == "target", yes = col_map[links_comb$fill],
+      no = links_comb$fill
+    )
+    for (i in seq(2, nrow(links_comb), by = 2)) {
+      links_comb$fill[i - 1] <- links_comb$fill[i]
+    }
+    links_comb$node_fill <- ifelse(
+      links_comb$x == "target", yes = links_comb$fill, no = "lightgray"
+    )
+
+    ggplot(
+      links_comb,
+      aes(
+        x = x, next_x = next_x,
+        node = node, next_node = next_node,
+        label = node, fill = fill
+      )
+    ) +
+      geom_sankey(flow.alpha = 0.5, show.legend = FALSE) +
+      geom_sankey_label(size = 2) +
+      scale_fill_identity() +
+      theme_void()
+  },
+  width = 1400,
+  height = 600,
+  res = 150
 )
 ```
 

@@ -35,6 +35,7 @@ RUN apt-get update \
         -e "install.packages('hdf5r')" \
         -e "install.packages('flexdashboard')" \
         -e "install.packages('BiocManager')" \
+        -e "install.packages('remotes')" \
         -e "BiocManager::install('glmGamPoi')" \
         -e "BiocManager::install('GSEABase')" \
         -e "BiocManager::install('scuttle')" \
@@ -43,6 +44,7 @@ RUN apt-get update \
         -e "BiocManager::install('biomaRt')" \
         -e "BiocManager::install('IHW')" \
         -e "BiocManager::install('ComplexHeatmap')" \
+        -e "remotes::install_github('davidsjoberg/ggsankey')" \
     && apt-get clean \
     && rm -Rf /var/lib/apt/lists/ \
         /tmp/downloaded_packages/ \
