@@ -288,7 +288,6 @@ if (file.exists(rds)) {
 
 gene_sets_sub <- gene_sets[names(gene_sets) %in% names(gene_sets_keep)]
 gene_sets_sub
-gene_sets_sub <- unique(unlist(geneIds(gene_sets_sub)))
 
 gene_anno <- data.frame(
   symbol = unlist(seurat_orig@misc), ensembl = rownames(seurat_orig)
@@ -358,7 +357,6 @@ for (i in seq_along(seurat_list)) {
   gse <- gse[ , order(gse$tau)]
 
   deg <- as.SingleCellExperiment(seurat_list[[i]], assay = "RNA")
-  deg <- deg[rownames(deg) %in% gene_sets_sub, ]
   deg <- suppressWarnings(
     aggregateAcrossCells(
       deg, colData(deg)[ , "Sample.ID"],
@@ -389,6 +387,9 @@ for (i in seq_along(seurat_list)) {
   )
   gse_data[[i]] <- gse
 
+  gene_sets_sub <- gene_sets[names(gene_sets) %in% rownames(gse)]
+  gene_sets_sub <- unique(unlist(geneIds(gene_sets_sub)))
+  deg <- deg[rownames(deg) %in% gene_sets_sub, ]
   dge_orig <- DGEList(counts(deg))
   keep <- filterByExpr(
     dge_orig, group = deg$tau,
