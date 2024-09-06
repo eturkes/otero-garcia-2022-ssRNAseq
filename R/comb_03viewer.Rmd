@@ -108,7 +108,7 @@ top_anno <- HeatmapAnnotation(
   group = anno_block(
     gp = gpar(fill = "lightgray", col = "lightgray"),
     labels = unique(deg_data[[1]]$tau),
-    labels_gp = gpar(col = "black", fontsize = 9),
+    labels_gp = gpar(col = "black", fontsize = 10),
     height = unit(5, "mm")
   ),
   col = list(
@@ -299,13 +299,13 @@ renderPlot(
         column_split = rep(seq(2), each = 8),
         column_gap = unit(1.5, units = "mm"),
         rect_gp = gpar(col = "black", lwd = 0.25),
-        row_names_gp = gpar(fontsize = 8),
+        row_names_gp = gpar(fontsize = 10),
         column_title_gp = gpar(fontsize = 10),
         row_title_rot = 0,
         top_annotation = top_anno,
         show_column_names = FALSE,
         cell_fun = function(j, i, x, y, width, height, fill) {
-          grid.text(sig_tmp[i, j], x = x, y = y, gp = gpar(fontsize = 8))
+          grid.text(sig_tmp[i, j], x = x, y = y, gp = gpar(fontsize = 10))
         },
         heatmap_legend_param = list(
           title = "logCPM", direction = "horizontal",
@@ -317,7 +317,7 @@ renderPlot(
     )
   },
   width = 750,
-  height = 500,
+  height = 600,
   res = 96
 )
 ```
@@ -370,13 +370,13 @@ renderPlot(
         column_split = rep(seq(2), each = 8),
         column_gap = unit(1.5, units = "mm"),
         rect_gp = gpar(col = "black", lwd = 0.25),
-        row_names_gp = gpar(fontsize = 8),
+        row_names_gp = gpar(fontsize = 10),
         column_title_gp = gpar(fontsize = 10),
         row_title_rot = 0,
         top_annotation = top_anno,
         show_column_names = FALSE,
         cell_fun = function(j, i, x, y, width, height, fill) {
-          grid.text(sig_tmp[i, j], x = x, y = y, gp = gpar(fontsize = 8))
+          grid.text(sig_tmp[i, j], x = x, y = y, gp = gpar(fontsize = 10))
         },
         heatmap_legend_param = list(
           title = "Scaled logCPM", direction = "horizontal",
@@ -388,7 +388,7 @@ renderPlot(
     )
   },
   width = 750,
-  height = 500,
+  height = 600,
   res = 96
 )
 ```
@@ -506,14 +506,16 @@ renderPlot(
         column_split = rep(seq(2), each = 8),
         column_gap = unit(1.5, units = "mm"),
         rect_gp = gpar(col = "black", lwd = 0.25),
-        row_names_gp = gpar(fontsize = 8),
+        row_names_gp = gpar(fontsize = 10),
         column_title_gp = gpar(fontsize = 10),
         row_title_rot = 0,
         top_annotation = top_anno,
         show_column_names = FALSE,
-        row_names_max_width = max_text_width(rownames(mat)),
+        row_names_max_width = max_text_width(
+          rownames(mat), gp = gpar(fontsize = 10)
+        ),
         cell_fun = function(j, i, x, y, width, height, fill) {
-          grid.text(sig_tmp[i, j], x = x, y = y, gp = gpar(fontsize = 8))
+          grid.text(sig_tmp[i, j], x = x, y = y, gp = gpar(fontsize = 10))
         },
         heatmap_legend_param = list(
           title = "logGSE", direction = "horizontal",
@@ -525,7 +527,7 @@ renderPlot(
     )
   },
   width = 1400,
-  height = 500,
+  height = 550,
   res = 96
 )
 ```
@@ -639,7 +641,7 @@ renderPlot(
     )
   },
   width = 750,
-  height = 500,
+  height = 600,
   res = 96
 )
 ```
@@ -736,7 +738,7 @@ renderPlot(
     )
   },
   width = 750,
-  height = 500,
+  height = 600,
   res = 96
 )
 ```
@@ -971,13 +973,13 @@ renderPlot(
         column_split = rep(seq(2), each = 8),
         column_gap = unit(1.5, units = "mm"),
         rect_gp = gpar(col = "black", lwd = 0.25),
-        row_names_gp = gpar(fontsize = 8),
+        row_names_gp = gpar(fontsize = 10),
         column_title_gp = gpar(fontsize = 10),
         row_title_rot = 0,
         top_annotation = top_anno,
         show_column_names = FALSE,
         cell_fun = function(j, i, x, y, width, height, fill) {
-          grid.text(sig_tmp[i, j], x = x, y = y, gp = gpar(fontsize = 8))
+          grid.text(sig_tmp[i, j], x = x, y = y, gp = gpar(fontsize = 10))
         },
         heatmap_legend_param = list(
           title = "logCPM", direction = "horizontal",
@@ -989,7 +991,7 @@ renderPlot(
     )
   },
   width = 750,
-  height = 500,
+  height = 600,
   res = 96
 )
 ```
@@ -1042,13 +1044,13 @@ renderPlot(
         column_split = rep(seq(2), each = 8),
         column_gap = unit(1.5, units = "mm"),
         rect_gp = gpar(col = "black", lwd = 0.25),
-        row_names_gp = gpar(fontsize = 8),
+        row_names_gp = gpar(fontsize = 10),
         column_title_gp = gpar(fontsize = 10),
         row_title_rot = 0,
         top_annotation = top_anno,
         show_column_names = FALSE,
         cell_fun = function(j, i, x, y, width, height, fill) {
-          grid.text(sig_tmp[i, j], x = x, y = y, gp = gpar(fontsize = 8))
+          grid.text(sig_tmp[i, j], x = x, y = y, gp = gpar(fontsize = 10))
         },
         heatmap_legend_param = list(
           title = "Scaled logCPM", direction = "horizontal",
@@ -1060,7 +1062,7 @@ renderPlot(
     )
   },
   width = 750,
-  height = 500,
+  height = 600,
   res = 96
 )
 ```
@@ -1178,14 +1180,16 @@ renderPlot(
         column_split = rep(seq(2), each = 8),
         column_gap = unit(1.5, units = "mm"),
         rect_gp = gpar(col = "black", lwd = 0.25),
-        row_names_gp = gpar(fontsize = 8),
+        row_names_gp = gpar(fontsize = 10),
         column_title_gp = gpar(fontsize = 10),
         row_title_rot = 0,
         top_annotation = top_anno,
         show_column_names = FALSE,
-        row_names_max_width = max_text_width(rownames(mat)),
+        row_names_max_width = max_text_width(
+          rownames(mat), gp = gpar(fontsize = 10)
+        ),
         cell_fun = function(j, i, x, y, width, height, fill) {
-          grid.text(sig_tmp[i, j], x = x, y = y, gp = gpar(fontsize = 8))
+          grid.text(sig_tmp[i, j], x = x, y = y, gp = gpar(fontsize = 10))
         },
         heatmap_legend_param = list(
           title = "logGSE", direction = "horizontal",
@@ -1197,7 +1201,7 @@ renderPlot(
     )
   },
   width = 1400,
-  height = 500,
+  height = 550,
   res = 96
 )
 ```
@@ -1311,7 +1315,7 @@ renderPlot(
     )
   },
   width = 750,
-  height = 500,
+  height = 600,
   res = 96
 )
 ```
@@ -1408,7 +1412,7 @@ renderPlot(
     )
   },
   width = 750,
-  height = 500,
+  height = 600,
   res = 96
 )
 ```
@@ -1644,13 +1648,13 @@ renderPlot(
         column_split = rep(seq(2), each = 8),
         column_gap = unit(1.5, units = "mm"),
         rect_gp = gpar(col = "black", lwd = 0.25),
-        row_names_gp = gpar(fontsize = 8),
+        row_names_gp = gpar(fontsize = 10),
         column_title_gp = gpar(fontsize = 10),
         row_title_rot = 0,
         top_annotation = top_anno,
         show_column_names = FALSE,
         cell_fun = function(j, i, x, y, width, height, fill) {
-          grid.text(sig_tmp[i, j], x = x, y = y, gp = gpar(fontsize = 8))
+          grid.text(sig_tmp[i, j], x = x, y = y, gp = gpar(fontsize = 10))
         },
         heatmap_legend_param = list(
           title = "logCPM", direction = "horizontal",
@@ -1662,7 +1666,7 @@ renderPlot(
     )
   },
   width = 750,
-  height = 500,
+  height = 600,
   res = 96
 )
 ```
@@ -1715,13 +1719,13 @@ renderPlot(
         column_split = rep(seq(2), each = 8),
         column_gap = unit(1.5, units = "mm"),
         rect_gp = gpar(col = "black", lwd = 0.25),
-        row_names_gp = gpar(fontsize = 8),
+        row_names_gp = gpar(fontsize = 10),
         column_title_gp = gpar(fontsize = 10),
         row_title_rot = 0,
         top_annotation = top_anno,
         show_column_names = FALSE,
         cell_fun = function(j, i, x, y, width, height, fill) {
-          grid.text(sig_tmp[i, j], x = x, y = y, gp = gpar(fontsize = 8))
+          grid.text(sig_tmp[i, j], x = x, y = y, gp = gpar(fontsize = 10))
         },
         heatmap_legend_param = list(
           title = "Scaled logCPM", direction = "horizontal",
@@ -1733,7 +1737,7 @@ renderPlot(
     )
   },
   width = 750,
-  height = 500,
+  height = 600,
   res = 96
 )
 ```
@@ -1853,14 +1857,16 @@ renderPlot(
         column_split = rep(seq(2), each = 8),
         column_gap = unit(1.5, units = "mm"),
         rect_gp = gpar(col = "black", lwd = 0.25),
-        row_names_gp = gpar(fontsize = 8),
+        row_names_gp = gpar(fontsize = 10),
         column_title_gp = gpar(fontsize = 10),
         row_title_rot = 0,
         top_annotation = top_anno,
         show_column_names = FALSE,
-        row_names_max_width = max_text_width(rownames(mat)),
+        row_names_max_width = max_text_width(
+          rownames(mat), gp = gpar(fontsize = 10)
+        ),
         cell_fun = function(j, i, x, y, width, height, fill) {
-          grid.text(sig_tmp[i, j], x = x, y = y, gp = gpar(fontsize = 8))
+          grid.text(sig_tmp[i, j], x = x, y = y, gp = gpar(fontsize = 10))
         },
         heatmap_legend_param = list(
           title = "logGSE", direction = "horizontal",
@@ -1872,7 +1878,7 @@ renderPlot(
     )
   },
   width = 1400,
-  height = 500,
+  height = 550,
   res = 96
 )
 ```
@@ -1986,7 +1992,7 @@ renderPlot(
     )
   },
   width = 750,
-  height = 500,
+  height = 600,
   res = 96
 )
 ```
@@ -2083,7 +2089,7 @@ renderPlot(
     )
   },
   width = 750,
-  height = 500,
+  height = 600,
   res = 96
 )
 ```
@@ -2321,13 +2327,13 @@ renderPlot(
         column_split = rep(seq(2), each = 8),
         column_gap = unit(1.5, units = "mm"),
         rect_gp = gpar(col = "black", lwd = 0.25),
-        row_names_gp = gpar(fontsize = 8),
+        row_names_gp = gpar(fontsize = 10),
         column_title_gp = gpar(fontsize = 10),
         row_title_rot = 0,
         top_annotation = top_anno,
         show_column_names = FALSE,
         cell_fun = function(j, i, x, y, width, height, fill) {
-          grid.text(sig_tmp[i, j], x = x, y = y, gp = gpar(fontsize = 8))
+          grid.text(sig_tmp[i, j], x = x, y = y, gp = gpar(fontsize = 10))
         },
         heatmap_legend_param = list(
           title = "logCPM", direction = "horizontal",
@@ -2339,7 +2345,7 @@ renderPlot(
     )
   },
   width = 750,
-  height = 500,
+  height = 600,
   res = 96
 )
 ```
@@ -2392,13 +2398,13 @@ renderPlot(
         column_split = rep(seq(2), each = 8),
         column_gap = unit(1.5, units = "mm"),
         rect_gp = gpar(col = "black", lwd = 0.25),
-        row_names_gp = gpar(fontsize = 8),
+        row_names_gp = gpar(fontsize = 10),
         column_title_gp = gpar(fontsize = 10),
         row_title_rot = 0,
         top_annotation = top_anno,
         show_column_names = FALSE,
         cell_fun = function(j, i, x, y, width, height, fill) {
-          grid.text(sig_tmp[i, j], x = x, y = y, gp = gpar(fontsize = 8))
+          grid.text(sig_tmp[i, j], x = x, y = y, gp = gpar(fontsize = 10))
         },
         heatmap_legend_param = list(
           title = "Scaled logCPM", direction = "horizontal",
@@ -2410,7 +2416,7 @@ renderPlot(
     )
   },
   width = 750,
-  height = 500,
+  height = 600,
   res = 96
 )
 ```
@@ -2531,14 +2537,16 @@ renderPlot(
         column_split = rep(seq(2), each = 8),
         column_gap = unit(1.5, units = "mm"),
         rect_gp = gpar(col = "black", lwd = 0.25),
-        row_names_gp = gpar(fontsize = 8),
+        row_names_gp = gpar(fontsize = 10),
         column_title_gp = gpar(fontsize = 10),
         row_title_rot = 0,
         top_annotation = top_anno,
         show_column_names = FALSE,
-        row_names_max_width = max_text_width(rownames(mat)),
+        row_names_max_width = max_text_width(
+          rownames(mat), gp = gpar(fontsize = 10)
+        ),
         cell_fun = function(j, i, x, y, width, height, fill) {
-          grid.text(sig_tmp[i, j], x = x, y = y, gp = gpar(fontsize = 8))
+          grid.text(sig_tmp[i, j], x = x, y = y, gp = gpar(fontsize = 10))
         },
         heatmap_legend_param = list(
           title = "logGSE", direction = "horizontal",
@@ -2550,7 +2558,7 @@ renderPlot(
     )
   },
   width = 1400,
-  height = 500,
+  height = 550,
   res = 96
 )
 ```
@@ -2664,7 +2672,7 @@ renderPlot(
     )
   },
   width = 750,
-  height = 500,
+  height = 600,
   res = 96
 )
 ```
@@ -2761,7 +2769,7 @@ renderPlot(
     )
   },
   width = 750,
-  height = 500,
+  height = 600,
   res = 96
 )
 ```
@@ -3000,13 +3008,13 @@ renderPlot(
         column_split = rep(seq(2), each = 8),
         column_gap = unit(1.5, units = "mm"),
         rect_gp = gpar(col = "black", lwd = 0.25),
-        row_names_gp = gpar(fontsize = 8),
+        row_names_gp = gpar(fontsize = 10),
         column_title_gp = gpar(fontsize = 10),
         row_title_rot = 0,
         top_annotation = top_anno,
         show_column_names = FALSE,
         cell_fun = function(j, i, x, y, width, height, fill) {
-          grid.text(sig_tmp[i, j], x = x, y = y, gp = gpar(fontsize = 8))
+          grid.text(sig_tmp[i, j], x = x, y = y, gp = gpar(fontsize = 10))
         },
         heatmap_legend_param = list(
           title = "logCPM", direction = "horizontal",
@@ -3018,7 +3026,7 @@ renderPlot(
     )
   },
   width = 750,
-  height = 500,
+  height = 600,
   res = 96
 )
 ```
@@ -3071,13 +3079,13 @@ renderPlot(
         column_split = rep(seq(2), each = 8),
         column_gap = unit(1.5, units = "mm"),
         rect_gp = gpar(col = "black", lwd = 0.25),
-        row_names_gp = gpar(fontsize = 8),
+        row_names_gp = gpar(fontsize = 10),
         column_title_gp = gpar(fontsize = 10),
         row_title_rot = 0,
         top_annotation = top_anno,
         show_column_names = FALSE,
         cell_fun = function(j, i, x, y, width, height, fill) {
-          grid.text(sig_tmp[i, j], x = x, y = y, gp = gpar(fontsize = 8))
+          grid.text(sig_tmp[i, j], x = x, y = y, gp = gpar(fontsize = 10))
         },
         heatmap_legend_param = list(
           title = "Scaled logCPM", direction = "horizontal",
@@ -3089,7 +3097,7 @@ renderPlot(
     )
   },
   width = 750,
-  height = 500,
+  height = 600,
   res = 96
 )
 ```
@@ -3211,14 +3219,16 @@ renderPlot(
         column_split = rep(seq(2), each = 8),
         column_gap = unit(1.5, units = "mm"),
         rect_gp = gpar(col = "black", lwd = 0.25),
-        row_names_gp = gpar(fontsize = 8),
+        row_names_gp = gpar(fontsize = 10),
         column_title_gp = gpar(fontsize = 10),
         row_title_rot = 0,
         top_annotation = top_anno,
         show_column_names = FALSE,
-        row_names_max_width = max_text_width(rownames(mat)),
+        row_names_max_width = max_text_width(
+          rownames(mat), gp = gpar(fontsize = 10)
+        ),
         cell_fun = function(j, i, x, y, width, height, fill) {
-          grid.text(sig_tmp[i, j], x = x, y = y, gp = gpar(fontsize = 8))
+          grid.text(sig_tmp[i, j], x = x, y = y, gp = gpar(fontsize = 10))
         },
         heatmap_legend_param = list(
           title = "logGSE", direction = "horizontal",
@@ -3230,7 +3240,7 @@ renderPlot(
     )
   },
   width = 1400,
-  height = 500,
+  height = 550,
   res = 96
 )
 ```
@@ -3344,7 +3354,7 @@ renderPlot(
     )
   },
   width = 750,
-  height = 500,
+  height = 600,
   res = 96
 )
 ```
@@ -3441,7 +3451,7 @@ renderPlot(
     )
   },
   width = 750,
-  height = 500,
+  height = 600,
   res = 96
 )
 ```
