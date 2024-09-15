@@ -10,3 +10,6 @@ README.md
 nohup.out
 .Rproj.user
 otero-garcia-2022-ssRNAseq.Rproj
+cache
+R
+src
