@@ -1,5 +1,5 @@
-#    This file is part of tau-mutant-snRNAseq.
-#    Copyright (C) 2024  Emir Turkes, Naoto Watamura, UK DRI at UCL
+#    This file is part of otero-garcia-2022-ssRNAseq.
+#    Copyright (C) 2024  Emir Turkes, UK DRI at UCL
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
