@@ -189,7 +189,7 @@ results_deg[[idx]][ , col] <- deg_corrections[length]
 
 rownames(results_deg[[idx]]) <- results_deg[[idx]]$X
 results_deg[[idx]] <- results_deg[[idx]][ , -1]
-results_deg[[idx]] <- results_deg[[idx]][ , 1:8]
+results_deg[[idx]] <- results_deg[[idx]][ , 1:7]
 results_deg[[idx]] <- results_deg[[idx]][
   order(results_deg[[idx]]$P.value.adj),
 ]
@@ -413,7 +413,7 @@ results_gse[[idx]][ , col] <- gse_corrections[length]
 
 rownames(results_gse[[idx]]) <- results_gse[[idx]]$X
 results_gse[[idx]] <- results_gse[[idx]][ , -1]
-results_gse[[idx]] <- results_gse[[idx]][ , 1:8]
+results_gse[[idx]] <- results_gse[[idx]][ , 1:7]
 results_gse[[idx]] <- results_gse[[idx]][
   order(results_gse[[idx]]$P.value.adj),
 ]
@@ -872,7 +872,7 @@ results_deg[[idx]][ , col] <- deg_corrections[length]
 
 rownames(results_deg[[idx]]) <- results_deg[[idx]]$X
 results_deg[[idx]] <- results_deg[[idx]][ , -1]
-results_deg[[idx]] <- results_deg[[idx]][ , 1:8]
+results_deg[[idx]] <- results_deg[[idx]][ , 1:7]
 results_deg[[idx]] <- results_deg[[idx]][
   order(results_deg[[idx]]$P.value.adj),
 ]
@@ -1096,7 +1096,7 @@ results_gse[[idx]][ , col] <- gse_corrections[length]
 
 rownames(results_gse[[idx]]) <- results_gse[[idx]]$X
 results_gse[[idx]] <- results_gse[[idx]][ , -1]
-results_gse[[idx]] <- results_gse[[idx]][ , 1:8]
+results_gse[[idx]] <- results_gse[[idx]][ , 1:7]
 results_gse[[idx]] <- results_gse[[idx]][
   order(results_gse[[idx]]$P.value.adj),
 ]
@@ -1555,7 +1555,7 @@ results_deg[[idx]][ , col] <- deg_corrections[length]
 
 rownames(results_deg[[idx]]) <- results_deg[[idx]]$X
 results_deg[[idx]] <- results_deg[[idx]][ , -1]
-results_deg[[idx]] <- results_deg[[idx]][ , 1:8]
+results_deg[[idx]] <- results_deg[[idx]][ , 1:7]
 results_deg[[idx]] <- results_deg[[idx]][
   order(results_deg[[idx]]$P.value.adj),
 ]
@@ -1779,7 +1779,7 @@ results_gse[[idx]][ , col] <- gse_corrections[length]
 
 rownames(results_gse[[idx]]) <- results_gse[[idx]]$X
 results_gse[[idx]] <- results_gse[[idx]][ , -1]
-results_gse[[idx]] <- results_gse[[idx]][ , 1:8]
+results_gse[[idx]] <- results_gse[[idx]][ , 1:7]
 results_gse[[idx]] <- results_gse[[idx]][
   order(results_gse[[idx]]$P.value.adj),
 ]
@@ -2239,7 +2239,7 @@ results_deg[[idx]][ , col] <- deg_corrections[length]
 
 rownames(results_deg[[idx]]) <- results_deg[[idx]]$X
 results_deg[[idx]] <- results_deg[[idx]][ , -1]
-results_deg[[idx]] <- results_deg[[idx]][ , 1:8]
+results_deg[[idx]] <- results_deg[[idx]][ , 1:7]
 results_deg[[idx]] <- results_deg[[idx]][
   order(results_deg[[idx]]$P.value.adj),
 ]
@@ -2464,7 +2464,7 @@ results_gse[[idx]][ , col] <- gse_corrections[length]
 
 rownames(results_gse[[idx]]) <- results_gse[[idx]]$X
 results_gse[[idx]] <- results_gse[[idx]][ , -1]
-results_gse[[idx]] <- results_gse[[idx]][ , 1:8]
+results_gse[[idx]] <- results_gse[[idx]][ , 1:7]
 results_gse[[idx]] <- results_gse[[idx]][
   order(results_gse[[idx]]$P.value.adj),
 ]
@@ -2925,7 +2925,7 @@ results_deg[[idx]][ , col] <- deg_corrections[length]
 
 rownames(results_deg[[idx]]) <- results_deg[[idx]]$X
 results_deg[[idx]] <- results_deg[[idx]][ , -1]
-results_deg[[idx]] <- results_deg[[idx]][ , 1:8]
+results_deg[[idx]] <- results_deg[[idx]][ , 1:7]
 results_deg[[idx]] <- results_deg[[idx]][
   order(results_deg[[idx]]$P.value.adj),
 ]
@@ -3151,7 +3151,7 @@ results_gse[[idx]][ , col] <- gse_corrections[length]
 
 rownames(results_gse[[idx]]) <- results_gse[[idx]]$X
 results_gse[[idx]] <- results_gse[[idx]][ , -1]
-results_gse[[idx]] <- results_gse[[idx]][ , 1:8]
+results_gse[[idx]] <- results_gse[[idx]][ , 1:7]
 results_gse[[idx]] <- results_gse[[idx]][
   order(results_gse[[idx]]$P.value.adj),
 ]
