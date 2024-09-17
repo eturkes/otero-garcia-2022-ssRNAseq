@@ -616,7 +616,7 @@ renderPlot(
         top_annotation = top_anno,
         show_column_names = FALSE,
         cell_fun = function(j, i, x, y, width, height, fill) {
-          grid.text(sig_tmp[i, j], x = x, y = y, gp = gpar(fontsize = 10))
+          grid.text(sig_tmp[i, j], x = x, y = y, gp = gpar(fontsize = 8))
         },
         heatmap_legend_param = list(
           title = "logCPM", direction = "horizontal",
@@ -713,7 +713,7 @@ renderPlot(
         top_annotation = top_anno,
         show_column_names = FALSE,
         cell_fun = function(j, i, x, y, width, height, fill) {
-          grid.text(sig_tmp[i, j], x = x, y = y, gp = gpar(fontsize = 10))
+          grid.text(sig_tmp[i, j], x = x, y = y, gp = gpar(fontsize = 8))
         },
         heatmap_legend_param = list(
           title = "Scaled logCPM", direction = "horizontal",
@@ -1299,7 +1299,7 @@ renderPlot(
         top_annotation = top_anno,
         show_column_names = FALSE,
         cell_fun = function(j, i, x, y, width, height, fill) {
-          grid.text(sig_tmp[i, j], x = x, y = y, gp = gpar(fontsize = 10))
+          grid.text(sig_tmp[i, j], x = x, y = y, gp = gpar(fontsize = 8))
         },
         heatmap_legend_param = list(
           title = "logCPM", direction = "horizontal",
@@ -1396,7 +1396,7 @@ renderPlot(
         top_annotation = top_anno,
         show_column_names = FALSE,
         cell_fun = function(j, i, x, y, width, height, fill) {
-          grid.text(sig_tmp[i, j], x = x, y = y, gp = gpar(fontsize = 10))
+          grid.text(sig_tmp[i, j], x = x, y = y, gp = gpar(fontsize = 8))
         },
         heatmap_legend_param = list(
           title = "Scaled logCPM", direction = "horizontal",
@@ -1982,7 +1982,7 @@ renderPlot(
         top_annotation = top_anno,
         show_column_names = FALSE,
         cell_fun = function(j, i, x, y, width, height, fill) {
-          grid.text(sig_tmp[i, j], x = x, y = y, gp = gpar(fontsize = 10))
+          grid.text(sig_tmp[i, j], x = x, y = y, gp = gpar(fontsize = 8))
         },
         heatmap_legend_param = list(
           title = "logCPM", direction = "horizontal",
@@ -2079,7 +2079,7 @@ renderPlot(
         top_annotation = top_anno,
         show_column_names = FALSE,
         cell_fun = function(j, i, x, y, width, height, fill) {
-          grid.text(sig_tmp[i, j], x = x, y = y, gp = gpar(fontsize = 10))
+          grid.text(sig_tmp[i, j], x = x, y = y, gp = gpar(fontsize = 8))
         },
         heatmap_legend_param = list(
           title = "Scaled logCPM", direction = "horizontal",
@@ -2667,7 +2667,7 @@ renderPlot(
         top_annotation = top_anno,
         show_column_names = FALSE,
         cell_fun = function(j, i, x, y, width, height, fill) {
-          grid.text(sig_tmp[i, j], x = x, y = y, gp = gpar(fontsize = 10))
+          grid.text(sig_tmp[i, j], x = x, y = y, gp = gpar(fontsize = 8))
         },
         heatmap_legend_param = list(
           title = "logCPM", direction = "horizontal",
@@ -2764,7 +2764,7 @@ renderPlot(
         top_annotation = top_anno,
         show_column_names = FALSE,
         cell_fun = function(j, i, x, y, width, height, fill) {
-          grid.text(sig_tmp[i, j], x = x, y = y, gp = gpar(fontsize = 10))
+          grid.text(sig_tmp[i, j], x = x, y = y, gp = gpar(fontsize = 8))
         },
         heatmap_legend_param = list(
           title = "Scaled logCPM", direction = "horizontal",
@@ -3354,7 +3354,7 @@ renderPlot(
         top_annotation = top_anno,
         show_column_names = FALSE,
         cell_fun = function(j, i, x, y, width, height, fill) {
-          grid.text(sig_tmp[i, j], x = x, y = y, gp = gpar(fontsize = 10))
+          grid.text(sig_tmp[i, j], x = x, y = y, gp = gpar(fontsize = 8))
         },
         heatmap_legend_param = list(
           title = "logCPM", direction = "horizontal",
@@ -3451,7 +3451,7 @@ renderPlot(
         top_annotation = top_anno,
         show_column_names = FALSE,
         cell_fun = function(j, i, x, y, width, height, fill) {
-          grid.text(sig_tmp[i, j], x = x, y = y, gp = gpar(fontsize = 10))
+          grid.text(sig_tmp[i, j], x = x, y = y, gp = gpar(fontsize = 8))
         },
         heatmap_legend_param = list(
           title = "Scaled logCPM", direction = "horizontal",
