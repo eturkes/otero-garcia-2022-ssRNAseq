@@ -70,7 +70,7 @@ library(conflicted)
 conflicts_prefer(edgeR::cpm, .quiet = TRUE)
 packages <- c(
   "GSEABase", "Seurat", "scuttle", "edgeR", "DT", "GSVA", "Rcpp", "biomaRt",
-  "IHW"
+  "IHW", "Matrix"
 )
 invisible(
   suppressPackageStartupMessages(
@@ -324,6 +324,7 @@ if (file.exists(rds)) {
     )
     rownames(scores) <- names(gene_sets)
     colnames(scores) <- colnames(seurat)
+    scores <- Matrix(scores, sparse = TRUE)
 
     seurat[["GF"]] <- CreateAssay5Object(scores, data = log1p(scores))
     DefaultAssay(seurat) <- "GF"
