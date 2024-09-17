@@ -507,16 +507,10 @@ renderPlot(
       mat <- mat[match(rownames(sig_tmp), rownames(mat)), ]
     }
 
-    mat <- t(
-      apply(
-        mat, MARGIN = 1,
-        FUN = function (x) ((2 * (x - min(x)) / (max(x) - min(x))) - 1)
-      )
-    )
     draw(
       Heatmap(
         mat,
-        col = colorRamp2(c(-1, 0, 1), colors = c("blue", "white", "red")),
+        col = colorRamp2(gse_range[[idx]], colors = c("blue", "white", "red")),
         column_title = ctype_name[[idx]],
         cluster_columns = FALSE,
         cluster_rows = FALSE,
@@ -1196,16 +1190,10 @@ renderPlot(
       mat <- mat[match(rownames(sig_tmp), rownames(mat)), ]
     }
 
-    mat <- t(
-      apply(
-        mat, MARGIN = 1,
-        FUN = function (x) ((2 * (x - min(x)) / (max(x) - min(x))) - 1)
-      )
-    )
     draw(
       Heatmap(
         mat,
-        col = colorRamp2(c(-1, 0, 1), colors = c("blue", "white", "red")),
+        col = colorRamp2(gse_range[[idx]], colors = c("blue", "white", "red")),
         column_title = ctype_name[[idx]],
         cluster_columns = FALSE,
         cluster_rows = FALSE,
@@ -1885,16 +1873,10 @@ renderPlot(
       mat <- mat[match(rownames(sig_tmp), rownames(mat)), ]
     }
 
-    mat <- t(
-      apply(
-        mat, MARGIN = 1,
-        FUN = function (x) ((2 * (x - min(x)) / (max(x) - min(x))) - 1)
-      )
-    )
     draw(
       Heatmap(
         mat,
-        col = colorRamp2(c(-1, 0, 1), colors = c("blue", "white", "red")),
+        col = colorRamp2(gse_range[[idx]], colors = c("blue", "white", "red")),
         column_title = ctype_name[[idx]],
         cluster_columns = FALSE,
         cluster_rows = FALSE,
@@ -2576,16 +2558,10 @@ renderPlot(
       mat <- mat[match(rownames(sig_tmp), rownames(mat)), ]
     }
 
-    mat <- t(
-      apply(
-        mat, MARGIN = 1,
-        FUN = function (x) ((2 * (x - min(x)) / (max(x) - min(x))) - 1)
-      )
-    )
     draw(
       Heatmap(
         mat,
-        col = colorRamp2(c(-1, 0, 1), colors = c("blue", "white", "red")),
+        col = colorRamp2(gse_range[[idx]], colors = c("blue", "white", "red")),
         column_title = ctype_name[[idx]],
         cluster_columns = FALSE,
         cluster_rows = FALSE,
@@ -3269,16 +3245,10 @@ renderPlot(
       mat <- mat[match(rownames(sig_tmp), rownames(mat)), ]
     }
 
-    mat <- t(
-      apply(
-        mat, MARGIN = 1,
-        FUN = function (x) ((2 * (x - min(x)) / (max(x) - min(x))) - 1)
-      )
-    )
     draw(
       Heatmap(
         mat,
-        col = colorRamp2(c(-1, 0, 1), colors = c("blue", "white", "red")),
+        col = colorRamp2(gse_range[[idx]], colors = c("blue", "white", "red")),
         column_title = ctype_name[[idx]],
         cluster_columns = FALSE,
         cluster_rows = FALSE,
@@ -3632,7 +3602,7 @@ Users can search for genes, sort columns, change the number of rows in view, and
 
 This section is similar to *Search Genes*, except shown and tested are gene sets from the GO Ontology.  
 A custom gene set enrichment method is used to aggregate genes into the gene sets.  
-Only the scaled heatmap is shown due to the space taken by gene set label names.
+Only the non-scaled version of the heatmap is shown due to the space taken by gene set label names.
 
 #### Gene Set Stats
 
