@@ -3609,6 +3609,48 @@ renderSankeyNetwork(
 )
 ```
 
+Viewer Documentation
+===
+
+<div style='font-size: 18px; padding-left: 500px; padding-right: 500px;'>
+
+#### Search Genes
+
+In this section, the user can create heatmaps for genes of interest.  
+By default, it is loaded to show the top up and downregulated significant genes.  
+The heatmap on the right shows scaled expression values, where in each row, the lowest value is assigned -1 and the highest value is assigned 1.  
+The heatmap on the left shows the "real" log counts-per-million values without scaling.  
+A cell is assigned and up or down arrow if there is a significant change (adjusted P-value < 0.05) in the corresponding direction.  
+Users can add or remove genes as desired and the heatmap will update.
+
+#### Gene Stats
+
+Stats tables for all genes that were tested, note that no significance cutoffs are applied in order to show all genes.  
+Users can search for genes, sort columns, change the number of rows in view, and download the table.
+
+#### Search Gene Sets
+
+This section is similar to *Search Genes*, except shown and tested are gene sets from the GO Ontology.  
+A custom gene set enrichment method is used to aggregate genes into the gene sets.  
+Only the scaled heatmap is shown due to the space taken by gene set label names.
+
+#### Gene Set Stats
+
+This section is similar to *Gene Stats*, but for the gene sets.
+
+#### Gene Set Genes
+
+Here users can input a gene set that was tested and see the expression of the genes within the gene set.  
+The output is similar to *Search Genes*.  
+Genes that which expression is too low to be quantified have cells shaded in gray.
+
+#### Gene Connectivity
+
+Here users can input any number of genes and visualise the genes that they are a part of.  
+Gene sets are filtered to those that are significantly changed in the same direction as the gene (adjusted P-value < 0.05).
+
+</div>
+
 ```{r, include = FALSE}
 rm(
   deg, deg_data, deg_list,
