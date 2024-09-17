@@ -33,11 +33,11 @@ packages <- c(
 )
 lapply(packages, FUN = library, character.only = TRUE)
 
-datatable_download_exp_10 <- function(dt) {
+datatable_download_exp_15 <- function(dt) {
   datatable(
     dt,
     options = list(
-      pageLength = 10,
+      pageLength = 15,
       scrollX = TRUE,
       dom = "Blfrtip",
       buttons = list(
@@ -57,11 +57,11 @@ datatable_download_exp_10 <- function(dt) {
     extensions = "Buttons"
   )
 }
-datatable_download_exp_5 <- function(dt) {
+datatable_download_exp_7 <- function(dt) {
   datatable(
     dt,
     options = list(
-      pageLength = 5,
+      pageLength = 7,
       scrollX = TRUE,
       dom = "Blfrtip",
       buttons = list(
@@ -410,7 +410,7 @@ renderPlot(
 ### Gene Stats
 
 ```{r}
-datatable_download_exp_10(results_deg[[idx]])
+datatable_download_exp_15(results_deg[[idx]])
 ```
 
 ### Search Gene Sets
@@ -549,7 +549,7 @@ renderPlot(
 ### Gene Set Stats
 
 ```{r}
-datatable_download_exp_5(results_gse[[idx]])
+datatable_download_exp_7(results_gse[[idx]])
 ```
 
 ### Gene Set Genes
@@ -1093,7 +1093,7 @@ renderPlot(
 ### Gene Stats
 
 ```{r}
-datatable_download_exp_10(results_deg[[idx]])
+datatable_download_exp_15(results_deg[[idx]])
 ```
 
 ### Search Gene Sets
@@ -1232,7 +1232,7 @@ renderPlot(
 ### Gene Set Stats
 
 ```{r}
-datatable_download_exp_5(results_gse[[idx]])
+datatable_download_exp_7(results_gse[[idx]])
 ```
 
 ### Gene Set Genes
@@ -1776,7 +1776,7 @@ renderPlot(
 ### Gene Stats
 
 ```{r}
-datatable_download_exp_10(results_deg[[idx]])
+datatable_download_exp_15(results_deg[[idx]])
 ```
 
 ### Search Gene Sets
@@ -1915,7 +1915,7 @@ renderPlot(
 ### Gene Set Stats
 
 ```{r}
-datatable_download_exp_5(results_gse[[idx]])
+datatable_download_exp_7(results_gse[[idx]])
 ```
 
 ### Gene Set Genes
@@ -2460,7 +2460,7 @@ renderPlot(
 ### Gene Stats
 
 ```{r}
-datatable_download_exp_10(results_deg[[idx]])
+datatable_download_exp_15(results_deg[[idx]])
 ```
 
 ### Search Gene Sets
@@ -2600,7 +2600,7 @@ renderPlot(
 ### Gene Set Stats
 
 ```{r}
-datatable_download_exp_5(results_gse[[idx]])
+datatable_download_exp_7(results_gse[[idx]])
 ```
 
 ### Gene Set Genes
@@ -3146,7 +3146,7 @@ renderPlot(
 ### Gene Stats
 
 ```{r}
-datatable_download_exp_10(results_deg[[idx]])
+datatable_download_exp_15(results_deg[[idx]])
 ```
 
 ### Search Gene Sets
@@ -3287,7 +3287,7 @@ renderPlot(
 ### Gene Set Stats
 
 ```{r}
-datatable_download_exp_5(results_gse[[idx]])
+datatable_download_exp_7(results_gse[[idx]])
 ```
 
 ### Gene Set Genes
