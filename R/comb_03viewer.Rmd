@@ -145,20 +145,10 @@ deg <- deg_data[[idx]]
 deg_corrected[[idx]] <- removeBatchEffect(
   logcounts(deg), batch = deg$donor_id, group = deg$tau
 )
-deg_range[[idx]] <- c(
-  min(deg_corrected[[idx]]),
-  (min(deg_corrected[[idx]]) + max(deg_corrected[[idx]])) / 2,
-  max(deg_corrected[[idx]])
-)
 
 gse <- gse_data[[idx]]
 gse_corrected[[idx]] <- removeBatchEffect(
   logcounts(gse), batch = gse$donor_id, group = gse$tau
-)
-gse_range[[idx]] <- c(
-  min(gse_corrected[[idx]]),
-  (min(gse_corrected[[idx]]) + max(gse_corrected[[idx]])) / 2,
-  max(gse_corrected[[idx]])
 )
 ```
 
@@ -279,7 +269,7 @@ renderPlot(
     draw(
       Heatmap(
         mat,
-        col = colorRamp2(deg_range[[idx]], colors = c("blue", "white", "red")),
+        col = colorRamp2(c(0, 7, 15), colors = c("blue", "white", "red")),
         column_title = ctype_name[[idx]],
         cluster_columns = FALSE,
         cluster_rows = FALSE,
@@ -483,10 +473,16 @@ renderPlot(
       mat <- mat[match(rownames(sig_tmp), rownames(mat)), ]
     }
 
+    mat <- t(
+      apply(
+        mat, MARGIN = 1,
+        FUN = function (x) ((2 * (x - min(x)) / (max(x) - min(x))) - 1)
+      )
+    )
     draw(
       Heatmap(
         mat,
-        col = colorRamp2(gse_range[[idx]], colors = c("blue", "white", "red")),
+        col = colorRamp2(c(-1, 0, 1), colors = c("blue", "white", "red")),
         column_title = ctype_name[[idx]],
         cluster_columns = FALSE,
         cluster_rows = FALSE,
@@ -596,7 +592,7 @@ renderPlot(
     draw(
       Heatmap(
         mat,
-        col = colorRamp2(deg_range[[idx]], colors = c("blue", "white", "red")),
+        col = colorRamp2(c(0, 7, 15), colors = c("blue", "white", "red")),
         na_col = "darkgrey",
         column_title = paste0(
           ctype_name[[idx]],
@@ -830,20 +826,10 @@ deg <- deg_data[[idx]]
 deg_corrected[[idx]] <- removeBatchEffect(
   logcounts(deg), batch = deg$donor_id, group = deg$tau
 )
-deg_range[[idx]] <- c(
-  min(deg_corrected[[idx]]),
-  (min(deg_corrected[[idx]]) + max(deg_corrected[[idx]])) / 2,
-  max(deg_corrected[[idx]])
-)
 
 gse <- gse_data[[idx]]
 gse_corrected[[idx]] <- removeBatchEffect(
   logcounts(gse), batch = gse$donor_id, group = gse$tau
-)
-gse_range[[idx]] <- c(
-  min(gse_corrected[[idx]]),
-  (min(gse_corrected[[idx]]) + max(gse_corrected[[idx]])) / 2,
-  max(gse_corrected[[idx]])
 )
 ```
 
@@ -964,7 +950,7 @@ renderPlot(
     draw(
       Heatmap(
         mat,
-        col = colorRamp2(deg_range[[idx]], colors = c("blue", "white", "red")),
+        col = colorRamp2(c(0, 7, 15), colors = c("blue", "white", "red")),
         column_title = ctype_name[[idx]],
         cluster_columns = FALSE,
         cluster_rows = FALSE,
@@ -1168,10 +1154,16 @@ renderPlot(
       mat <- mat[match(rownames(sig_tmp), rownames(mat)), ]
     }
 
+    mat <- t(
+      apply(
+        mat, MARGIN = 1,
+        FUN = function (x) ((2 * (x - min(x)) / (max(x) - min(x))) - 1)
+      )
+    )
     draw(
       Heatmap(
         mat,
-        col = colorRamp2(gse_range[[idx]], colors = c("blue", "white", "red")),
+        col = colorRamp2(c(-1, 0, 1), colors = c("blue", "white", "red")),
         column_title = ctype_name[[idx]],
         cluster_columns = FALSE,
         cluster_rows = FALSE,
@@ -1281,7 +1273,7 @@ renderPlot(
     draw(
       Heatmap(
         mat,
-        col = colorRamp2(deg_range[[idx]], colors = c("blue", "white", "red")),
+        col = colorRamp2(c(0, 7, 15), colors = c("blue", "white", "red")),
         na_col = "darkgrey",
         column_title = paste0(
           ctype_name[[idx]],
@@ -1515,20 +1507,10 @@ deg <- deg_data[[idx]]
 deg_corrected[[idx]] <- removeBatchEffect(
   logcounts(deg), batch = deg$donor_id, group = deg$tau
 )
-deg_range[[idx]] <- c(
-  min(deg_corrected[[idx]]),
-  (min(deg_corrected[[idx]]) + max(deg_corrected[[idx]])) / 2,
-  max(deg_corrected[[idx]])
-)
 
 gse <- gse_data[[idx]]
 gse_corrected[[idx]] <- removeBatchEffect(
   logcounts(gse), batch = gse$donor_id, group = gse$tau
-)
-gse_range[[idx]] <- c(
-  min(gse_corrected[[idx]]),
-  (min(gse_corrected[[idx]]) + max(gse_corrected[[idx]])) / 2,
-  max(gse_corrected[[idx]])
 )
 ```
 
@@ -1649,7 +1631,7 @@ renderPlot(
     draw(
       Heatmap(
         mat,
-        col = colorRamp2(deg_range[[idx]], colors = c("blue", "white", "red")),
+        col = colorRamp2(c(0, 7, 15), colors = c("blue", "white", "red")),
         column_title = ctype_name[[idx]],
         cluster_columns = FALSE,
         cluster_rows = FALSE,
@@ -1853,10 +1835,16 @@ renderPlot(
       mat <- mat[match(rownames(sig_tmp), rownames(mat)), ]
     }
 
+    mat <- t(
+      apply(
+        mat, MARGIN = 1,
+        FUN = function (x) ((2 * (x - min(x)) / (max(x) - min(x))) - 1)
+      )
+    )
     draw(
       Heatmap(
         mat,
-        col = colorRamp2(gse_range[[idx]], colors = c("blue", "white", "red")),
+        col = colorRamp2(c(-1, 0, 1), colors = c("blue", "white", "red")),
         column_title = ctype_name[[idx]],
         cluster_columns = FALSE,
         cluster_rows = FALSE,
@@ -1966,7 +1954,7 @@ renderPlot(
     draw(
       Heatmap(
         mat,
-        col = colorRamp2(deg_range[[idx]], colors = c("blue", "white", "red")),
+        col = colorRamp2(c(0, 7, 15), colors = c("blue", "white", "red")),
         na_col = "darkgrey",
         column_title = paste0(
           ctype_name[[idx]],
@@ -2200,20 +2188,10 @@ deg <- deg_data[[idx]]
 deg_corrected[[idx]] <- removeBatchEffect(
   logcounts(deg), batch = deg$donor_id, group = deg$tau
 )
-deg_range[[idx]] <- c(
-  min(deg_corrected[[idx]]),
-  (min(deg_corrected[[idx]]) + max(deg_corrected[[idx]])) / 2,
-  max(deg_corrected[[idx]])
-)
 
 gse <- gse_data[[idx]]
 gse_corrected[[idx]] <- removeBatchEffect(
   logcounts(gse), batch = gse$donor_id, group = gse$tau
-)
-gse_range[[idx]] <- c(
-  min(gse_corrected[[idx]]),
-  (min(gse_corrected[[idx]]) + max(gse_corrected[[idx]])) / 2,
-  max(gse_corrected[[idx]])
 )
 ```
 
@@ -2335,7 +2313,7 @@ renderPlot(
     draw(
       Heatmap(
         mat,
-        col = colorRamp2(deg_range[[idx]], colors = c("blue", "white", "red")),
+        col = colorRamp2(c(0, 7, 15), colors = c("blue", "white", "red")),
         column_title = ctype_name[[idx]],
         cluster_columns = FALSE,
         cluster_rows = FALSE,
@@ -2540,10 +2518,16 @@ renderPlot(
       mat <- mat[match(rownames(sig_tmp), rownames(mat)), ]
     }
 
+    mat <- t(
+      apply(
+        mat, MARGIN = 1,
+        FUN = function (x) ((2 * (x - min(x)) / (max(x) - min(x))) - 1)
+      )
+    )
     draw(
       Heatmap(
         mat,
-        col = colorRamp2(gse_range[[idx]], colors = c("blue", "white", "red")),
+        col = colorRamp2(c(-1, 0, 1), colors = c("blue", "white", "red")),
         column_title = ctype_name[[idx]],
         cluster_columns = FALSE,
         cluster_rows = FALSE,
@@ -2653,7 +2637,7 @@ renderPlot(
     draw(
       Heatmap(
         mat,
-        col = colorRamp2(deg_range[[idx]], colors = c("blue", "white", "red")),
+        col = colorRamp2(c(0, 7, 15), colors = c("blue", "white", "red")),
         na_col = "darkgrey",
         column_title = paste0(
           ctype_name[[idx]],
@@ -2887,20 +2871,10 @@ deg <- deg_data[[idx]]
 deg_corrected[[idx]] <- removeBatchEffect(
   logcounts(deg), batch = deg$donor_id, group = deg$tau
 )
-deg_range[[idx]] <- c(
-  min(deg_corrected[[idx]]),
-  (min(deg_corrected[[idx]]) + max(deg_corrected[[idx]])) / 2,
-  max(deg_corrected[[idx]])
-)
 
 gse <- gse_data[[idx]]
 gse_corrected[[idx]] <- removeBatchEffect(
   logcounts(gse), batch = gse$donor_id, group = gse$tau
-)
-gse_range[[idx]] <- c(
-  min(gse_corrected[[idx]]),
-  (min(gse_corrected[[idx]]) + max(gse_corrected[[idx]])) / 2,
-  max(gse_corrected[[idx]])
 )
 ```
 
@@ -3023,7 +2997,7 @@ renderPlot(
     draw(
       Heatmap(
         mat,
-        col = colorRamp2(deg_range[[idx]], colors = c("blue", "white", "red")),
+        col = colorRamp2(c(0, 7, 15), colors = c("blue", "white", "red")),
         column_title = ctype_name[[idx]],
         cluster_columns = FALSE,
         cluster_rows = FALSE,
@@ -3229,10 +3203,16 @@ renderPlot(
       mat <- mat[match(rownames(sig_tmp), rownames(mat)), ]
     }
 
+    mat <- t(
+      apply(
+        mat, MARGIN = 1,
+        FUN = function (x) ((2 * (x - min(x)) / (max(x) - min(x))) - 1)
+      )
+    )
     draw(
       Heatmap(
         mat,
-        col = colorRamp2(gse_range[[idx]], colors = c("blue", "white", "red")),
+        col = colorRamp2(c(-1, 0, 1), colors = c("blue", "white", "red")),
         column_title = ctype_name[[idx]],
         cluster_columns = FALSE,
         cluster_rows = FALSE,
@@ -3342,7 +3322,7 @@ renderPlot(
     draw(
       Heatmap(
         mat,
-        col = colorRamp2(deg_range[[idx]], colors = c("blue", "white", "red")),
+        col = colorRamp2(c(0, 7, 15), colors = c("blue", "white", "red")),
         na_col = "darkgrey",
         column_title = paste0(
           ctype_name[[idx]],
