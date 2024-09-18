@@ -369,7 +369,7 @@ for (i in seq_along(seurat_list)) {
   dge_orig <- DGEList(counts(gse))
   keep <- filterByExpr(
     dge_orig, group = gse$tau,
-    min.count = 10, min.total.count = 15
+    min.count = 100, min.total.count = 150
   )
   dge_orig <- dge_orig[keep, ]
   dge_orig <- calcNormFactors(dge_orig)
@@ -377,24 +377,24 @@ for (i in seq_along(seurat_list)) {
   dge$samples$norm.factors <- dge_orig$samples$norm.factors
   keep <- filterByExpr(
     dge, group = gse$tau,
-    min.count = 10, min.total.count = 15
+    min.count = 100, min.total.count = 150
   )
   dge <- dge[keep, , keep.lib.sizes = FALSE]
   dge <- calcNormFactors(dge)
 
   gse <- gse[rownames(gse) %in% rownames(dge)]
   logcounts(gse, withDimnames = FALSE) <- cpm(
-    dge, log = TRUE, prior.count = 2
+    dge, log = TRUE, prior.count = 0.2
   )
   gse_data[[i]] <- gse
 
-  gene_sets_sub <- gene_sets[names(gene_sets) %in% names(gene_sets_keep)]
+  gene_sets_sub <- gene_sets[names(gene_sets) %in% rownames(gse)]
   gene_sets_sub <- unique(unlist(geneIds(gene_sets_sub)))
   deg <- deg[rownames(deg) %in% gene_sets_sub, ]
   dge_orig <- DGEList(counts(deg))
   keep <- filterByExpr(
     dge_orig, group = deg$tau,
-    min.count = 10, min.total.count = 15
+    min.count = 50, min.total.count = 75
   )
   dge_orig <- dge_orig[keep, ]
   dge_orig <- calcNormFactors(dge_orig)
@@ -402,14 +402,14 @@ for (i in seq_along(seurat_list)) {
   dge$samples$norm.factors <- dge_orig$samples$norm.factors
   keep <- filterByExpr(
     dge, group = deg$tau,
-    min.count = 10, min.total.count = 15
+    min.count = 50, min.total.count = 75
   )
   dge <- dge[keep, , keep.lib.sizes = FALSE]
   dge <- calcNormFactors(dge)
 
   deg <- deg[rownames(deg) %in% rownames(dge)]
   logcounts(deg, withDimnames = FALSE) <- cpm(
-    dge, log = TRUE, prior.count = 2
+    dge, log = TRUE, prior.count = 0.4
   )
   deg_data[[i]] <- deg
 
