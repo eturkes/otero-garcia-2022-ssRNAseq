@@ -68,7 +68,8 @@ deg_data <- readRDS(file.path(data_dir, "deg_data.rds"))
 gse_data <- readRDS(file.path(data_dir, "gse_data.rds"))
 deg_list <- readRDS(file.path(data_dir, "deg_list.rds"))
 gse_list <- readRDS(file.path(data_dir, "gse_list.rds"))
-corrections <- readRDS(file.path(data_dir, "corrections.rds"))
+gse_corrections <- readRDS(file.path(data_dir, "gse_corrections.rds"))
+deg_corrections <- readRDS(file.path(data_dir, "deg_corrections.rds"))
 
 map <- setNames(gene_anno$symbol, gene_anno$ensembl)
 
@@ -181,10 +182,10 @@ close(tc)
 results_deg[[idx]] <- read.delim(text = results)
 
 col <- 6
-length1 <- nrow(gse_list[[1]]) + 1
-length2 <- nrow(gse_list[[1]]) + nrow(deg_list[[1]])
+length1 <- 1
+length2 <- nrow(deg_list[[1]])
 length <- length1:length2
-results_deg[[idx]][ , col] <- corrections[length]
+results_deg[[idx]][ , col] <- deg_corrections[length]
 
 rownames(results_deg[[idx]]) <- results_deg[[idx]]$X
 results_deg[[idx]] <- results_deg[[idx]][ , -1]
@@ -408,7 +409,7 @@ col <- 6
 length1 <- 1
 length2 <- nrow(gse_list[[1]])
 length <- length1:length2
-results_gse[[idx]][ , col] <- corrections[length]
+results_gse[[idx]][ , col] <- gse_corrections[length]
 
 rownames(results_gse[[idx]]) <- results_gse[[idx]]$X
 results_gse[[idx]] <- results_gse[[idx]][ , -1]
@@ -872,11 +873,10 @@ close(tc)
 results_deg[[idx]] <- read.delim(text = results)
 
 col <- 6
-length1 <- nrow(gse_list[[1]]) + nrow(deg_list[[1]]) + nrow(gse_list[[2]]) + 1
-length2 <- nrow(gse_list[[1]]) + nrow(deg_list[[1]]) + nrow(gse_list[[2]]) +
-  nrow(deg_list[[2]])
+length1 <- nrow(deg_list[[1]]) + 1
+length2 <- nrow(deg_list[[1]]) + nrow(deg_list[[2]])
 length <- length1:length2
-results_deg[[idx]][ , col] <- corrections[length]
+results_deg[[idx]][ , col] <- deg_corrections[length]
 
 rownames(results_deg[[idx]]) <- results_deg[[idx]]$X
 results_deg[[idx]] <- results_deg[[idx]][ , -1]
@@ -1097,10 +1097,10 @@ close(tc)
 results_gse[[idx]] <- read.delim(text = results)
 
 col <- 6
-length1 <- nrow(gse_list[[1]]) + nrow(deg_list[[1]]) + 1
-length2 <- nrow(gse_list[[1]]) + nrow(deg_list[[1]]) + nrow(gse_list[[2]])
+length1 <- nrow(gse_list[[1]]) + 1
+length2 <- nrow(gse_list[[1]]) + nrow(gse_list[[2]])
 length <- length1:length2
-results_gse[[idx]][ , col] <- corrections[length]
+results_gse[[idx]][ , col] <- gse_corrections[length]
 
 rownames(results_gse[[idx]]) <- results_gse[[idx]]$X
 results_gse[[idx]] <- results_gse[[idx]][ , -1]
@@ -1564,12 +1564,10 @@ close(tc)
 results_deg[[idx]] <- read.delim(text = results)
 
 col <- 6
-length1 <- nrow(gse_list[[1]]) + nrow(deg_list[[1]]) + nrow(gse_list[[2]]) +
-  nrow(deg_list[[2]]) + nrow(gse_list[[3]]) + 1
-length2 <- nrow(gse_list[[1]]) + nrow(deg_list[[1]]) + nrow(gse_list[[2]]) +
-  nrow(deg_list[[2]]) + nrow(gse_list[[3]]) + nrow(deg_list[[3]])
+length1 <- nrow(deg_list[[1]]) + nrow(deg_list[[2]]) + 1
+length2 <- nrow(deg_list[[1]]) + nrow(deg_list[[2]]) + nrow(deg_list[[3]])
 length <- length1:length2
-results_deg[[idx]][ , col] <- corrections[length]
+results_deg[[idx]][ , col] <- deg_corrections[length]
 
 rownames(results_deg[[idx]]) <- results_deg[[idx]]$X
 results_deg[[idx]] <- results_deg[[idx]][ , -1]
@@ -1790,12 +1788,10 @@ close(tc)
 results_gse[[idx]] <- read.delim(text = results)
 
 col <- 6
-length1 <- nrow(gse_list[[1]]) + nrow(deg_list[[1]]) + nrow(gse_list[[2]]) +
-  nrow(deg_list[[2]]) + 1
-length2 <- nrow(gse_list[[1]]) + nrow(deg_list[[1]]) + nrow(gse_list[[2]]) +
-  nrow(deg_list[[2]]) + nrow(gse_list[[3]])
+length1 <- nrow(gse_list[[1]]) + nrow(gse_list[[2]]) + 1
+length2 <- nrow(gse_list[[1]]) + nrow(gse_list[[2]]) + nrow(gse_list[[3]])
 length <- length1:length2
-results_gse[[idx]][ , col] <- corrections[length]
+results_gse[[idx]][ , col] <- gse_corrections[length]
 
 rownames(results_gse[[idx]]) <- results_gse[[idx]]$X
 results_gse[[idx]] <- results_gse[[idx]][ , -1]
@@ -2259,14 +2255,11 @@ close(tc)
 results_deg[[idx]] <- read.delim(text = results)
 
 col <- 6
-length1 <- nrow(gse_list[[1]]) + nrow(deg_list[[1]]) + nrow(gse_list[[2]]) +
-  nrow(deg_list[[2]]) + nrow(gse_list[[3]]) + nrow(deg_list[[3]]) +
-  nrow(gse_list[[4]]) + 1
-length2 <- nrow(gse_list[[1]]) + nrow(deg_list[[1]]) + nrow(gse_list[[2]]) +
-  nrow(deg_list[[2]]) + nrow(gse_list[[3]]) + nrow(deg_list[[3]]) +
-  nrow(gse_list[[4]]) + nrow(deg_list[[4]])
+length1 <- nrow(deg_list[[1]]) + nrow(deg_list[[2]]) + nrow(deg_list[[3]]) + 1
+length2 <- nrow(deg_list[[1]]) + nrow(deg_list[[2]]) + nrow(deg_list[[3]]) +
+  nrow(deg_list[[4]])
 length <- length1:length2
-results_deg[[idx]][ , col] <- corrections[length]
+results_deg[[idx]][ , col] <- deg_corrections[length]
 
 rownames(results_deg[[idx]]) <- results_deg[[idx]]$X
 results_deg[[idx]] <- results_deg[[idx]][ , -1]
@@ -2487,13 +2480,11 @@ close(tc)
 results_gse[[idx]] <- read.delim(text = results)
 
 col <- 6
-length1 <- nrow(gse_list[[1]]) + nrow(deg_list[[1]]) + nrow(gse_list[[2]]) +
-  nrow(deg_list[[2]]) + nrow(gse_list[[3]]) + nrow(deg_list[[3]]) + 1
-length2 <- nrow(gse_list[[1]]) + nrow(deg_list[[1]]) + nrow(gse_list[[2]]) +
-  nrow(deg_list[[2]]) + nrow(gse_list[[3]]) + nrow(deg_list[[3]]) +
+length1 <- nrow(gse_list[[1]]) + nrow(gse_list[[2]]) + nrow(gse_list[[3]]) + 1
+length2 <- nrow(gse_list[[1]]) + nrow(gse_list[[2]]) + nrow(gse_list[[3]]) +
   nrow(gse_list[[4]])
 length <- length1:length2
-results_gse[[idx]][ , col] <- corrections[length]
+results_gse[[idx]][ , col] <- gse_corrections[length]
 
 rownames(results_gse[[idx]]) <- results_gse[[idx]]$X
 results_gse[[idx]] <- results_gse[[idx]][ , -1]
@@ -2957,15 +2948,12 @@ close(tc)
 results_deg[[idx]] <- read.delim(text = results)
 
 col <- 6
-length1 <- nrow(gse_list[[1]]) + nrow(deg_list[[1]]) + nrow(gse_list[[2]]) +
-  nrow(deg_list[[2]]) + nrow(gse_list[[3]]) + nrow(deg_list[[3]]) +
-  nrow(gse_list[[4]]) + nrow(deg_list[[4]]) + nrow(gse_list[[5]]) + 1
-length2 <- nrow(gse_list[[1]]) + nrow(deg_list[[1]]) + nrow(gse_list[[2]]) +
-  nrow(deg_list[[2]]) + nrow(gse_list[[3]]) + nrow(deg_list[[3]]) +
-  nrow(gse_list[[4]]) + nrow(deg_list[[4]]) + nrow(gse_list[[5]]) +
-  nrow(deg_list[[5]])
+length1 <- nrow(deg_list[[1]]) + nrow(deg_list[[2]]) + nrow(deg_list[[3]]) +
+  nrow(deg_list[[4]]) + 1
+length2 <- nrow(deg_list[[1]]) + nrow(deg_list[[2]]) + nrow(deg_list[[3]]) +
+  nrow(deg_list[[4]]) + nrow(deg_list[[5]])
 length <- length1:length2
-results_deg[[idx]][ , col] <- corrections[length]
+results_deg[[idx]][ , col] <- deg_corrections[length]
 
 rownames(results_deg[[idx]]) <- results_deg[[idx]]$X
 results_deg[[idx]] <- results_deg[[idx]][ , -1]
@@ -3186,14 +3174,12 @@ close(tc)
 results_gse[[idx]] <- read.delim(text = results)
 
 col <- 6
-length1 <- nrow(gse_list[[1]]) + nrow(deg_list[[1]]) + nrow(gse_list[[2]]) +
-  nrow(deg_list[[2]]) + nrow(gse_list[[3]]) + nrow(deg_list[[3]]) +
-  nrow(gse_list[[4]]) + nrow(deg_list[[4]]) + 1
-length2 <- nrow(gse_list[[1]]) + nrow(deg_list[[1]]) + nrow(gse_list[[2]]) +
-  nrow(deg_list[[2]]) + nrow(gse_list[[3]]) + nrow(deg_list[[3]]) +
-  nrow(gse_list[[4]]) + nrow(deg_list[[4]]) + nrow(gse_list[[5]])
+length1 <- nrow(gse_list[[1]]) + nrow(gse_list[[2]]) + nrow(gse_list[[3]]) +
+  nrow(gse_list[[4]]) + 1
+length2 <- nrow(gse_list[[1]]) + nrow(gse_list[[2]]) + nrow(gse_list[[3]]) +
+  nrow(gse_list[[4]]) + nrow(gse_list[[5]])
 length <- length1:length2
-results_gse[[idx]][ , col] <- corrections[length]
+results_gse[[idx]][ , col] <- gse_corrections[length]
 
 rownames(results_gse[[idx]]) <- results_gse[[idx]]$X
 results_gse[[idx]] <- results_gse[[idx]][ , -1]
