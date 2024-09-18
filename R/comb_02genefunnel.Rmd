@@ -297,11 +297,10 @@ if (!file.exists(rds)) {
   saveRDS(gene_anno, file = rds)
 }
 
-ctypes <- vector("list", length = 5)
+ctypes <- vector("list", length = 4)
 ctypes <- list(
   `Ex01_CUX2-LAMP5 (L2-L3)` = "Ex01_CUX2-LAMP5 (L2-L3)",
   `Ex02_CUX2-COL5A2 (L2-L4)` = "Ex02_CUX2-COL5A2 (L2-L4)",
-  `Ex03_RORB-MME (L4-L5)` = "Ex03_RORB-MME (L4-L5)",
   `Ex07_RORB-PCP4 (L5)` = "Ex07_RORB-PCP4 (L5)",
   `Ex10_THEMIS (L5-6)` = "Ex10_THEMIS (L5-6)"
 )
@@ -313,7 +312,7 @@ if (file.exists(rds)) {
 } else {
 
   seurat_orig@active.ident <- seurat_orig$Cell.Types
-  seurat_list <- vector("list", length = 5)
+  seurat_list <- vector("list", length = 4)
   for (i in seq_along(ctypes)) {
 
     seurat <- subset(seurat_orig, idents = ctypes[[i]])
@@ -340,10 +339,10 @@ if (file.exists(rds)) {
 }
 seurat_list
 
-gse_data <- vector("list", length = 5)
-deg_data <- vector("list", length = 5)
-gse_list <- vector("list", length = 5)
-deg_list <- vector("list", length = 5)
+gse_data <- vector("list", length = 4)
+deg_data <- vector("list", length = 4)
+gse_list <- vector("list", length = 4)
+deg_list <- vector("list", length = 4)
 
 for (i in seq_along(seurat_list)) {
 
@@ -443,8 +442,7 @@ for (i in seq_along(seurat_list)) {
 
 results <- rbind(
   gse_list[[1]], deg_list[[1]], gse_list[[2]], deg_list[[2]],
-  gse_list[[3]], deg_list[[3]], gse_list[[4]], deg_list[[4]],
-  gse_list[[5]], deg_list[[5]]
+  gse_list[[3]], deg_list[[3]], gse_list[[4]], deg_list[[4]]
 )
 
 corrections <- data.frame(mean = results[ , 2], p = results[ , 6])
