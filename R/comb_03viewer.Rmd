@@ -191,7 +191,7 @@ rownames(results_deg[[idx]]) <- results_deg[[idx]]$X
 results_deg[[idx]] <- results_deg[[idx]][ , -1]
 results_deg[[idx]] <- results_deg[[idx]][ , 1:7]
 results_deg[[idx]] <- results_deg[[idx]][
-  order(results_deg[[idx]]$P.value.adj),
+  order(results_deg[[idx]]$AveExpr, decreasing = TRUE),
 ]
 gene_anno_sub <- gene_anno[
   gene_anno$ensembl %in% rownames(results_deg[[idx]]),
@@ -415,7 +415,7 @@ rownames(results_gse[[idx]]) <- results_gse[[idx]]$X
 results_gse[[idx]] <- results_gse[[idx]][ , -1]
 results_gse[[idx]] <- results_gse[[idx]][ , 1:7]
 results_gse[[idx]] <- results_gse[[idx]][
-  order(results_gse[[idx]]$P.value.adj),
+  order(results_gse[[idx]]$AveExpr, decreasing = TRUE),
 ]
 results_gse[[idx]]$GeneSet <- rownames(results_gse[[idx]])
 
@@ -536,7 +536,9 @@ selectizeInput(
   label = "Select Gene Sets:",
   choices = names(gene_sets[names(gene_sets) %in% names(gene_sets_keep)]),
   selected = rownames(results_gse[[idx]])[
-    which.min(results_gse[[idx]]$P.value.adj)
+    which.max(
+      results_gse[[idx]][results_gse[[idx]]$P.value.adj < 0.05, ]$AveExpr
+    )
   ],
   width = "100%"
 )
@@ -874,7 +876,7 @@ rownames(results_deg[[idx]]) <- results_deg[[idx]]$X
 results_deg[[idx]] <- results_deg[[idx]][ , -1]
 results_deg[[idx]] <- results_deg[[idx]][ , 1:7]
 results_deg[[idx]] <- results_deg[[idx]][
-  order(results_deg[[idx]]$P.value.adj),
+  order(results_deg[[idx]]$AveExpr, decreasing = TRUE),
 ]
 gene_anno_sub <- gene_anno[
   gene_anno$ensembl %in% rownames(results_deg[[idx]]),
@@ -1098,7 +1100,7 @@ rownames(results_gse[[idx]]) <- results_gse[[idx]]$X
 results_gse[[idx]] <- results_gse[[idx]][ , -1]
 results_gse[[idx]] <- results_gse[[idx]][ , 1:7]
 results_gse[[idx]] <- results_gse[[idx]][
-  order(results_gse[[idx]]$P.value.adj),
+  order(results_gse[[idx]]$AveExpr, decreasing = TRUE),
 ]
 results_gse[[idx]]$GeneSet <- rownames(results_gse[[idx]])
 
@@ -1219,7 +1221,9 @@ selectizeInput(
   label = "Select Gene Sets:",
   choices = names(gene_sets[names(gene_sets) %in% names(gene_sets_keep)]),
   selected = rownames(results_gse[[idx]])[
-    which.min(results_gse[[idx]]$P.value.adj)
+    which.max(
+      results_gse[[idx]][results_gse[[idx]]$P.value.adj < 0.05, ]$AveExpr
+    )
   ],
   width = "100%"
 )
@@ -1557,7 +1561,7 @@ rownames(results_deg[[idx]]) <- results_deg[[idx]]$X
 results_deg[[idx]] <- results_deg[[idx]][ , -1]
 results_deg[[idx]] <- results_deg[[idx]][ , 1:7]
 results_deg[[idx]] <- results_deg[[idx]][
-  order(results_deg[[idx]]$P.value.adj),
+  order(results_deg[[idx]]$AveExpr, decreasing = TRUE),
 ]
 gene_anno_sub <- gene_anno[
   gene_anno$ensembl %in% rownames(results_deg[[idx]]),
@@ -1781,7 +1785,7 @@ rownames(results_gse[[idx]]) <- results_gse[[idx]]$X
 results_gse[[idx]] <- results_gse[[idx]][ , -1]
 results_gse[[idx]] <- results_gse[[idx]][ , 1:7]
 results_gse[[idx]] <- results_gse[[idx]][
-  order(results_gse[[idx]]$P.value.adj),
+  order(results_gse[[idx]]$AveExpr, decreasing = TRUE),
 ]
 results_gse[[idx]]$GeneSet <- rownames(results_gse[[idx]])
 
@@ -1902,7 +1906,9 @@ selectizeInput(
   label = "Select Gene Sets:",
   choices = names(gene_sets[names(gene_sets) %in% names(gene_sets_keep)]),
   selected = rownames(results_gse[[idx]])[
-    which.min(results_gse[[idx]]$P.value.adj)
+    which.max(
+      results_gse[[idx]][results_gse[[idx]]$P.value.adj < 0.05, ]$AveExpr
+    )
   ],
   width = "100%"
 )
@@ -2241,7 +2247,7 @@ rownames(results_deg[[idx]]) <- results_deg[[idx]]$X
 results_deg[[idx]] <- results_deg[[idx]][ , -1]
 results_deg[[idx]] <- results_deg[[idx]][ , 1:7]
 results_deg[[idx]] <- results_deg[[idx]][
-  order(results_deg[[idx]]$P.value.adj),
+  order(results_deg[[idx]]$AveExpr, decreasing = TRUE),
 ]
 gene_anno_sub <- gene_anno[
   gene_anno$ensembl %in% rownames(results_deg[[idx]]),
@@ -2466,7 +2472,7 @@ rownames(results_gse[[idx]]) <- results_gse[[idx]]$X
 results_gse[[idx]] <- results_gse[[idx]][ , -1]
 results_gse[[idx]] <- results_gse[[idx]][ , 1:7]
 results_gse[[idx]] <- results_gse[[idx]][
-  order(results_gse[[idx]]$P.value.adj),
+  order(results_gse[[idx]]$AveExpr, decreasing = TRUE),
 ]
 results_gse[[idx]]$GeneSet <- rownames(results_gse[[idx]])
 
@@ -2587,7 +2593,9 @@ selectizeInput(
   label = "Select Gene Sets:",
   choices = names(gene_sets[names(gene_sets) %in% names(gene_sets_keep)]),
   selected = rownames(results_gse[[idx]])[
-    which.min(results_gse[[idx]]$P.value.adj)
+    which.max(
+      results_gse[[idx]][results_gse[[idx]]$P.value.adj < 0.05, ]$AveExpr
+    )
   ],
   width = "100%"
 )
@@ -2927,7 +2935,7 @@ rownames(results_deg[[idx]]) <- results_deg[[idx]]$X
 results_deg[[idx]] <- results_deg[[idx]][ , -1]
 results_deg[[idx]] <- results_deg[[idx]][ , 1:7]
 results_deg[[idx]] <- results_deg[[idx]][
-  order(results_deg[[idx]]$P.value.adj),
+  order(results_deg[[idx]]$AveExpr, decreasing = TRUE),
 ]
 gene_anno_sub <- gene_anno[
   gene_anno$ensembl %in% rownames(results_deg[[idx]]),
@@ -3153,7 +3161,7 @@ rownames(results_gse[[idx]]) <- results_gse[[idx]]$X
 results_gse[[idx]] <- results_gse[[idx]][ , -1]
 results_gse[[idx]] <- results_gse[[idx]][ , 1:7]
 results_gse[[idx]] <- results_gse[[idx]][
-  order(results_gse[[idx]]$P.value.adj),
+  order(results_gse[[idx]]$AveExpr, decreasing = TRUE),
 ]
 results_gse[[idx]]$GeneSet <- rownames(results_gse[[idx]])
 
@@ -3274,7 +3282,9 @@ selectizeInput(
   label = "Select Gene Sets:",
   choices = names(gene_sets[names(gene_sets) %in% names(gene_sets_keep)]),
   selected = rownames(results_gse[[idx]])[
-    which.min(results_gse[[idx]]$P.value.adj)
+    which.max(
+      results_gse[[idx]][results_gse[[idx]]$P.value.adj < 0.05, ]$AveExpr
+    )
   ],
   width = "100%"
 )
