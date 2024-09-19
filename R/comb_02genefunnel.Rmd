@@ -413,7 +413,7 @@ for (i in seq_along(seurat_list)) {
   )
   deg_data[[i]] <- deg
 
-  design <- model.matrix(~ 0 + gse$tau + gse$donor_id)
+  design <- model.matrix(~ 0 + gse$tau)
   colnames(design) <- make.names(colnames(design))
   cont_mat <- makeContrasts(
     NFT_CTRL =
@@ -422,7 +422,13 @@ for (i in seq_along(seurat_list)) {
     levels = design
   )
 
-  fit <- lmFit(logcounts(gse), design)
+  corr <- duplicateCorrelation(
+    logcounts(gse), design = design, block = gse$donor_id
+  )
+  fit <- lmFit(
+    logcounts(gse), design,
+    correlation = corr$consensus.correlation, block = gse$donor_id
+  )
   fit <- contrasts.fit(fit, cont_mat)
   fit <- eBayes(fit, trend = TRUE, robust = TRUE)
   print(plotSA(fit))
@@ -434,7 +440,13 @@ for (i in seq_along(seurat_list)) {
   )
   gse_list[[i]] <- read.delim(file.path(cache_dir, "results.tsv"))
 
-  fit <- lmFit(logcounts(deg), design)
+  corr <- duplicateCorrelation(
+    logcounts(deg), design = design, block = deg$donor_id
+  )
+  fit <- lmFit(
+    logcounts(deg), design,
+    correlation = corr$consensus.correlation, block = deg$donor_id
+  )
   fit <- contrasts.fit(fit, cont_mat)
   fit <- eBayes(fit, trend = TRUE, robust = TRUE)
   print(plotSA(fit))

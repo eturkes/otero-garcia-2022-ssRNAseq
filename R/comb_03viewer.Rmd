@@ -102,7 +102,7 @@ top_anno <- HeatmapAnnotation(
 )
 
 deg <- deg_data[[1]]
-design_deg <- model.matrix(~ 0 + deg$tau + deg$donor_id)
+design_deg <- model.matrix(~ 0 + deg$tau)
 colnames(design_deg) <- make.names(colnames(design_deg))
 cont_mat_deg <- makeContrasts(
   NFT_CTRL =
@@ -112,7 +112,7 @@ cont_mat_deg <- makeContrasts(
 )
 
 gse <- gse_data[[1]]
-design_gse <- model.matrix(~ 0 + gse$tau + gse$donor_id)
+design_gse <- model.matrix(~ 0 + gse$tau)
 colnames(design_gse) <- make.names(colnames(design_gse))
 cont_mat_gse <- makeContrasts(
   NFT_CTRL =
@@ -158,7 +158,13 @@ Row {.tabset}
 ### Search Genes
 
 ```{r, include = FALSE}
-fit <- lmFit(logcounts(deg), design_deg)
+corr <- duplicateCorrelation(
+  logcounts(deg), design = design_deg, block = deg$donor_id
+)
+fit <- lmFit(
+  logcounts(deg), design_deg,
+  correlation = corr$consensus.correlation, block = deg$donor_id
+)
 fit <- contrasts.fit(fit, cont_mat_deg)
 fit <- eBayes(fit, trend = TRUE, robust = TRUE)
 
@@ -382,7 +388,13 @@ datatable_download_exp_15(results_deg[[idx]])
 ### Search Gene Sets
 
 ```{r, include = FALSE}
-fit <- lmFit(logcounts(gse), design_gse)
+corr <- duplicateCorrelation(
+  logcounts(gse), design = design_gse, block = gse$donor_id
+)
+fit <- lmFit(
+  logcounts(gse), design_gse,
+  correlation = corr$consensus.correlation, block = gse$donor_id
+)
 fit <- contrasts.fit(fit, cont_mat_gse)
 fit <- eBayes(fit, trend = TRUE, robust = TRUE)
 
@@ -839,7 +851,13 @@ Row {.tabset}
 ### Search Genes
 
 ```{r, include = FALSE}
-fit <- lmFit(logcounts(deg), design_deg)
+corr <- duplicateCorrelation(
+  logcounts(deg), design = design_deg, block = deg$donor_id
+)
+fit <- lmFit(
+  logcounts(deg), design_deg,
+  correlation = corr$consensus.correlation, block = deg$donor_id
+)
 fit <- contrasts.fit(fit, cont_mat_deg)
 fit <- eBayes(fit, trend = TRUE, robust = TRUE)
 
@@ -1063,7 +1081,13 @@ datatable_download_exp_15(results_deg[[idx]])
 ### Search Gene Sets
 
 ```{r, include = FALSE}
-fit <- lmFit(logcounts(gse), design_gse)
+corr <- duplicateCorrelation(
+  logcounts(gse), design = design_gse, block = gse$donor_id
+)
+fit <- lmFit(
+  logcounts(gse), design_gse,
+  correlation = corr$consensus.correlation, block = gse$donor_id
+)
 fit <- contrasts.fit(fit, cont_mat_gse)
 fit <- eBayes(fit, trend = TRUE, robust = TRUE)
 
@@ -1520,7 +1544,13 @@ Row {.tabset}
 ### Search Genes
 
 ```{r, include = FALSE}
-fit <- lmFit(logcounts(deg), design_deg)
+corr <- duplicateCorrelation(
+  logcounts(deg), design = design_deg, block = deg$donor_id
+)
+fit <- lmFit(
+  logcounts(deg), design_deg,
+  correlation = corr$consensus.correlation, block = deg$donor_id
+)
 fit <- contrasts.fit(fit, cont_mat_deg)
 fit <- eBayes(fit, trend = TRUE, robust = TRUE)
 
@@ -1744,7 +1774,13 @@ datatable_download_exp_15(results_deg[[idx]])
 ### Search Gene Sets
 
 ```{r, include = FALSE}
-fit <- lmFit(logcounts(gse), design_gse)
+corr <- duplicateCorrelation(
+  logcounts(gse), design = design_gse, block = gse$donor_id
+)
+fit <- lmFit(
+  logcounts(gse), design_gse,
+  correlation = corr$consensus.correlation, block = gse$donor_id
+)
 fit <- contrasts.fit(fit, cont_mat_gse)
 fit <- eBayes(fit, trend = TRUE, robust = TRUE)
 
@@ -2201,7 +2237,13 @@ Row {.tabset}
 ### Search Genes
 
 ```{r, include = FALSE}
-fit <- lmFit(logcounts(deg), design_deg)
+corr <- duplicateCorrelation(
+  logcounts(deg), design = design_deg, block = deg$donor_id
+)
+fit <- lmFit(
+  logcounts(deg), design_deg,
+  correlation = corr$consensus.correlation, block = deg$donor_id
+)
 fit <- contrasts.fit(fit, cont_mat_deg)
 fit <- eBayes(fit, trend = TRUE, robust = TRUE)
 
@@ -2426,7 +2468,13 @@ datatable_download_exp_15(results_deg[[idx]])
 ### Search Gene Sets
 
 ```{r, include = FALSE}
-fit <- lmFit(logcounts(gse), design_gse)
+corr <- duplicateCorrelation(
+  logcounts(gse), design = design_gse, block = gse$donor_id
+)
+fit <- lmFit(
+  logcounts(gse), design_gse,
+  correlation = corr$consensus.correlation, block = gse$donor_id
+)
 fit <- contrasts.fit(fit, cont_mat_gse)
 fit <- eBayes(fit, trend = TRUE, robust = TRUE)
 
@@ -2884,7 +2932,13 @@ Row {.tabset}
 ### Search Genes
 
 ```{r, include = FALSE}
-fit <- lmFit(logcounts(deg), design_deg)
+corr <- duplicateCorrelation(
+  logcounts(deg), design = design_deg, block = deg$donor_id
+)
+fit <- lmFit(
+  logcounts(deg), design_deg,
+  correlation = corr$consensus.correlation, block = deg$donor_id
+)
 fit <- contrasts.fit(fit, cont_mat_deg)
 fit <- eBayes(fit, trend = TRUE, robust = TRUE)
 
@@ -3110,7 +3164,13 @@ datatable_download_exp_15(results_deg[[idx]])
 ### Search Gene Sets
 
 ```{r, include = FALSE}
-fit <- lmFit(logcounts(gse), design_gse)
+corr <- duplicateCorrelation(
+  logcounts(gse), design = design_gse, block = gse$donor_id
+)
+fit <- lmFit(
+  logcounts(gse), design_gse,
+  correlation = corr$consensus.correlation, block = gse$donor_id
+)
 fit <- contrasts.fit(fit, cont_mat_gse)
 fit <- eBayes(fit, trend = TRUE, robust = TRUE)
 
