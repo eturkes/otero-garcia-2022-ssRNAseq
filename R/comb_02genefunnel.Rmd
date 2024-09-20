@@ -422,9 +422,7 @@ for (i in seq_along(seurat_list)) {
     levels = design
   )
 
-  corr <- duplicateCorrelation(
-    logcounts(gse), design = design, block = gse$donor_id
-  )
+  corr <- duplicateCorrelation(logcounts(gse), design, block = gse$donor_id)
   fit <- lmFit(
     logcounts(gse), design,
     correlation = corr$consensus.correlation, block = gse$donor_id
@@ -440,9 +438,7 @@ for (i in seq_along(seurat_list)) {
   )
   gse_list[[i]] <- read.delim(file.path(cache_dir, "results.tsv"))
 
-  corr <- duplicateCorrelation(
-    logcounts(deg), design = design, block = deg$donor_id
-  )
+  corr <- duplicateCorrelation(logcounts(deg), design, block = deg$donor_id)
   fit <- lmFit(
     logcounts(deg), design,
     correlation = corr$consensus.correlation, block = deg$donor_id

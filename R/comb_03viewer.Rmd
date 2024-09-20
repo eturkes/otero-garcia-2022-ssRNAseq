@@ -140,16 +140,8 @@ Ex01_CUX2-LAMP5 (L2-L3)
 ```{r, include = FALSE}
 idx <- 1
 ctype_name[[idx]] <- ctypes[idx]
-
 deg <- deg_data[[idx]]
-deg_corrected[[idx]] <- removeBatchEffect(
-  logcounts(deg), batch = deg$donor_id, group = deg$tau
-)
-
 gse <- gse_data[[idx]]
-gse_corrected[[idx]] <- removeBatchEffect(
-  logcounts(gse), batch = gse$donor_id, group = gse$tau
-)
 ```
 
 Row {.tabset}
@@ -158,15 +150,18 @@ Row {.tabset}
 ### Search Genes
 
 ```{r, include = FALSE}
-corr <- duplicateCorrelation(
-  logcounts(deg), design = design_deg, block = deg$donor_id
-)
+corr <- duplicateCorrelation(logcounts(deg), design_deg, block = deg$donor_id)
 fit <- lmFit(
   logcounts(deg), design_deg,
   correlation = corr$consensus.correlation, block = deg$donor_id
 )
 fit <- contrasts.fit(fit, cont_mat_deg)
 fit <- eBayes(fit, trend = TRUE, robust = TRUE)
+
+deg_corrected[[idx]] <- removeBatchEffect(
+  logcounts(deg), group = deg$tau,
+  correlation = corr$consensus.correlation, block = deg$donor_id
+)
 
 tests <- decideTests(fit, method = "global")
 tc <- textConnection("results", open = "w")
@@ -388,15 +383,18 @@ datatable_download_exp_15(results_deg[[idx]])
 ### Search Gene Sets
 
 ```{r, include = FALSE}
-corr <- duplicateCorrelation(
-  logcounts(gse), design = design_gse, block = gse$donor_id
-)
+corr <- duplicateCorrelation(logcounts(gse), design_gse, block = gse$donor_id)
 fit <- lmFit(
   logcounts(gse), design_gse,
   correlation = corr$consensus.correlation, block = gse$donor_id
 )
 fit <- contrasts.fit(fit, cont_mat_gse)
 fit <- eBayes(fit, trend = TRUE, robust = TRUE)
+
+gse_corrected[[idx]] <- removeBatchEffect(
+  logcounts(gse), group = gse$tau,
+  correlation = corr$consensus.correlation, block = gse$donor_id
+)
 
 tests <- decideTests(fit, method = "global")
 tc <- textConnection("results", open = "w")
@@ -833,16 +831,8 @@ Ex02_CUX2-COL5A2 (L2-L4)
 ```{r, include = FALSE}
 idx <- 2
 ctype_name[[idx]] <- ctypes[idx]
-
 deg <- deg_data[[idx]]
-deg_corrected[[idx]] <- removeBatchEffect(
-  logcounts(deg), batch = deg$donor_id, group = deg$tau
-)
-
 gse <- gse_data[[idx]]
-gse_corrected[[idx]] <- removeBatchEffect(
-  logcounts(gse), batch = gse$donor_id, group = gse$tau
-)
 ```
 
 Row {.tabset}
@@ -851,15 +841,18 @@ Row {.tabset}
 ### Search Genes
 
 ```{r, include = FALSE}
-corr <- duplicateCorrelation(
-  logcounts(deg), design = design_deg, block = deg$donor_id
-)
+corr <- duplicateCorrelation(logcounts(deg), design_deg, block = deg$donor_id)
 fit <- lmFit(
   logcounts(deg), design_deg,
   correlation = corr$consensus.correlation, block = deg$donor_id
 )
 fit <- contrasts.fit(fit, cont_mat_deg)
 fit <- eBayes(fit, trend = TRUE, robust = TRUE)
+
+deg_corrected[[idx]] <- removeBatchEffect(
+  logcounts(deg), group = deg$tau,
+  correlation = corr$consensus.correlation, block = deg$donor_id
+)
 
 tests <- decideTests(fit, method = "global")
 tc <- textConnection("results", open = "w")
@@ -1081,15 +1074,18 @@ datatable_download_exp_15(results_deg[[idx]])
 ### Search Gene Sets
 
 ```{r, include = FALSE}
-corr <- duplicateCorrelation(
-  logcounts(gse), design = design_gse, block = gse$donor_id
-)
+corr <- duplicateCorrelation(logcounts(gse), design_gse, block = gse$donor_id)
 fit <- lmFit(
   logcounts(gse), design_gse,
   correlation = corr$consensus.correlation, block = gse$donor_id
 )
 fit <- contrasts.fit(fit, cont_mat_gse)
 fit <- eBayes(fit, trend = TRUE, robust = TRUE)
+
+gse_corrected[[idx]] <- removeBatchEffect(
+  logcounts(gse), group = gse$tau,
+  correlation = corr$consensus.correlation, block = gse$donor_id
+)
 
 tests <- decideTests(fit, method = "global")
 tc <- textConnection("results", open = "w")
@@ -1526,16 +1522,8 @@ Ex03_RORB-MME (L4-L5)
 ```{r, include = FALSE}
 idx <- 3
 ctype_name[[idx]] <- ctypes[idx]
-
 deg <- deg_data[[idx]]
-deg_corrected[[idx]] <- removeBatchEffect(
-  logcounts(deg), batch = deg$donor_id, group = deg$tau
-)
-
 gse <- gse_data[[idx]]
-gse_corrected[[idx]] <- removeBatchEffect(
-  logcounts(gse), batch = gse$donor_id, group = gse$tau
-)
 ```
 
 Row {.tabset}
@@ -1544,15 +1532,18 @@ Row {.tabset}
 ### Search Genes
 
 ```{r, include = FALSE}
-corr <- duplicateCorrelation(
-  logcounts(deg), design = design_deg, block = deg$donor_id
-)
+corr <- duplicateCorrelation(logcounts(deg), design_deg, block = deg$donor_id)
 fit <- lmFit(
   logcounts(deg), design_deg,
   correlation = corr$consensus.correlation, block = deg$donor_id
 )
 fit <- contrasts.fit(fit, cont_mat_deg)
 fit <- eBayes(fit, trend = TRUE, robust = TRUE)
+
+deg_corrected[[idx]] <- removeBatchEffect(
+  logcounts(deg), group = deg$tau,
+  correlation = corr$consensus.correlation, block = deg$donor_id
+)
 
 tests <- decideTests(fit, method = "global")
 tc <- textConnection("results", open = "w")
@@ -1774,15 +1765,18 @@ datatable_download_exp_15(results_deg[[idx]])
 ### Search Gene Sets
 
 ```{r, include = FALSE}
-corr <- duplicateCorrelation(
-  logcounts(gse), design = design_gse, block = gse$donor_id
-)
+corr <- duplicateCorrelation(logcounts(gse), design_gse, block = gse$donor_id)
 fit <- lmFit(
   logcounts(gse), design_gse,
   correlation = corr$consensus.correlation, block = gse$donor_id
 )
 fit <- contrasts.fit(fit, cont_mat_gse)
 fit <- eBayes(fit, trend = TRUE, robust = TRUE)
+
+gse_corrected[[idx]] <- removeBatchEffect(
+  logcounts(gse), group = gse$tau,
+  correlation = corr$consensus.correlation, block = gse$donor_id
+)
 
 tests <- decideTests(fit, method = "global")
 tc <- textConnection("results", open = "w")
@@ -2219,16 +2213,8 @@ Ex07_RORB-PCP4 (L5)
 ```{r, include = FALSE}
 idx <- 4
 ctype_name[[idx]] <- ctypes[idx]
-
 deg <- deg_data[[idx]]
-deg_corrected[[idx]] <- removeBatchEffect(
-  logcounts(deg), batch = deg$donor_id, group = deg$tau
-)
-
 gse <- gse_data[[idx]]
-gse_corrected[[idx]] <- removeBatchEffect(
-  logcounts(gse), batch = gse$donor_id, group = gse$tau
-)
 ```
 
 Row {.tabset}
@@ -2237,15 +2223,18 @@ Row {.tabset}
 ### Search Genes
 
 ```{r, include = FALSE}
-corr <- duplicateCorrelation(
-  logcounts(deg), design = design_deg, block = deg$donor_id
-)
+corr <- duplicateCorrelation(logcounts(deg), design_deg, block = deg$donor_id)
 fit <- lmFit(
   logcounts(deg), design_deg,
   correlation = corr$consensus.correlation, block = deg$donor_id
 )
 fit <- contrasts.fit(fit, cont_mat_deg)
 fit <- eBayes(fit, trend = TRUE, robust = TRUE)
+
+deg_corrected[[idx]] <- removeBatchEffect(
+  logcounts(deg), group = deg$tau,
+  correlation = corr$consensus.correlation, block = deg$donor_id
+)
 
 tests <- decideTests(fit, method = "global")
 tc <- textConnection("results", open = "w")
@@ -2468,15 +2457,18 @@ datatable_download_exp_15(results_deg[[idx]])
 ### Search Gene Sets
 
 ```{r, include = FALSE}
-corr <- duplicateCorrelation(
-  logcounts(gse), design = design_gse, block = gse$donor_id
-)
+corr <- duplicateCorrelation(logcounts(gse), design_gse, block = gse$donor_id)
 fit <- lmFit(
   logcounts(gse), design_gse,
   correlation = corr$consensus.correlation, block = gse$donor_id
 )
 fit <- contrasts.fit(fit, cont_mat_gse)
 fit <- eBayes(fit, trend = TRUE, robust = TRUE)
+
+gse_corrected[[idx]] <- removeBatchEffect(
+  logcounts(gse), group = gse$tau,
+  correlation = corr$consensus.correlation, block = gse$donor_id
+)
 
 tests <- decideTests(fit, method = "global")
 tc <- textConnection("results", open = "w")
@@ -2914,16 +2906,8 @@ Ex10_THEMIS (L5-6)
 ```{r, include = FALSE}
 idx <- 5
 ctype_name[[idx]] <- ctypes[idx]
-
 deg <- deg_data[[idx]]
-deg_corrected[[idx]] <- removeBatchEffect(
-  logcounts(deg), batch = deg$donor_id, group = deg$tau
-)
-
 gse <- gse_data[[idx]]
-gse_corrected[[idx]] <- removeBatchEffect(
-  logcounts(gse), batch = gse$donor_id, group = gse$tau
-)
 ```
 
 Row {.tabset}
@@ -2932,15 +2916,18 @@ Row {.tabset}
 ### Search Genes
 
 ```{r, include = FALSE}
-corr <- duplicateCorrelation(
-  logcounts(deg), design = design_deg, block = deg$donor_id
-)
+corr <- duplicateCorrelation(logcounts(deg), design_deg, block = deg$donor_id)
 fit <- lmFit(
   logcounts(deg), design_deg,
   correlation = corr$consensus.correlation, block = deg$donor_id
 )
 fit <- contrasts.fit(fit, cont_mat_deg)
 fit <- eBayes(fit, trend = TRUE, robust = TRUE)
+
+deg_corrected[[idx]] <- removeBatchEffect(
+  logcounts(deg), group = deg$tau,
+  correlation = corr$consensus.correlation, block = deg$donor_id
+)
 
 tests <- decideTests(fit, method = "global")
 tc <- textConnection("results", open = "w")
@@ -3164,15 +3151,18 @@ datatable_download_exp_15(results_deg[[idx]])
 ### Search Gene Sets
 
 ```{r, include = FALSE}
-corr <- duplicateCorrelation(
-  logcounts(gse), design = design_gse, block = gse$donor_id
-)
+corr <- duplicateCorrelation(logcounts(gse), design_gse, block = gse$donor_id)
 fit <- lmFit(
   logcounts(gse), design_gse,
   correlation = corr$consensus.correlation, block = gse$donor_id
 )
 fit <- contrasts.fit(fit, cont_mat_gse)
 fit <- eBayes(fit, trend = TRUE, robust = TRUE)
+
+gse_corrected[[idx]] <- removeBatchEffect(
+  logcounts(gse), group = gse$tau,
+  correlation = corr$consensus.correlation, block = gse$donor_id
+)
 
 tests <- decideTests(fit, method = "global")
 tc <- textConnection("results", open = "w")
