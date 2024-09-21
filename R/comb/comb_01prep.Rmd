@@ -143,7 +143,7 @@ if (file.exists(rds)) {
 
   gc()
   plan("sequential")
-  seurat <- PrepSCTFindMarkers(seurat, verbose = TRUE)
+  seurat <- PrepSCTFindMarkers(seurat, verbose = FALSE)
   gc()
 
   seurat[["PREP_SCT"]] <- seurat[["SCT"]]
