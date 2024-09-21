@@ -20,13 +20,13 @@ version: "3"
 
 services:
   all:
-    image: eturkes/otero-garcia-2022-ssrnaseq:R4.3.3v8
+    image: eturkes/otero-garcia-2022-ssrnaseq:R4.3.3v9
     volumes:
       - ".:/home/rstudio/otero-garcia-2022-ssRNAseq:rw"
     command: Rscript -e "source('/home/rstudio/otero-garcia-2022-ssRNAseq/R/run_all.R')"
 
   rstudio:
-    image: eturkes/otero-garcia-2022-ssrnaseq:R4.3.3v8
+    image: eturkes/otero-garcia-2022-ssrnaseq:R4.3.3v9
     volumes:
       - ".:/home/rstudio/otero-garcia-2022-ssRNAseq:rw"
     ports:

@@ -1,0 +1,396 @@
+---
+title: "6 AT8 - 01 Prep"
+author:
+  - name: "Emir Turkes"
+date: '`r strftime(Sys.time(), format = "%B %d, %Y")`'
+link-citations: true
+output:
+  html_document:
+    code_folding: hide
+    number_sections: true
+    theme: lumen
+    highlight: haddock
+    toc: true
+    toc_depth: 2
+    toc_float:
+      collapsed: false
+      smooth_scroll: false
+knit: (function(inputFile, encoding) {
+  rmarkdown::render(
+    inputFile, encoding = encoding,
+    output_file = file.path(
+      "..", "..", "results", "individual", "6_AT8_01prep.html"
+    ))})
+---
+
+<style type="text/css">
+body {font-size: 16px;}
+h1.title {font-size: 35px;}
+h1 {font-size: 24px;}
+h2 {font-size: 22px;}
+.toc-content {padding-left: 0px; padding-right: 0px;}
+div.tocify {width: 100%;}
+.tocify-subheader .tocify-item {
+  font-size: 0.95em; padding-left: 25px; text-indent: 0;
+}
+.tocify-subheader .tocify-subheader .tocify-item {
+  font-size: 0.95em; padding-left: 35px; text-indent: 0;
+}
+div.main-container {max-width: none; width: 100%;}
+</style>
+
+*This file is a part of [otero-garcia-2022-ssRNAseq](https://github.com/eturkes/otero-garcia-2022-ssRNAseq).*
+
+The table of contents in the top left is clickable and can be used to quickly navigate the document.
+To toggle the visibility of code, use the `CODE` toggles at the top right of chunks.
+The toggle at the start of the document controls the visibility of all chunks.
+
+```{r}
+#    This file is part of otero-garcia-2022-ssRNAseq.
+#    Copyright (C) 2024  Emir Turkes, UK DRI at UCL
+#
+#    This program is free software: you can redistribute it and/or modify
+#    it under the terms of the GNU General Public License as published by
+#    the Free Software Foundation, either version 3 of the License, or
+#    (at your option) any later version.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU General Public License for more details.
+#
+#    You should have received a copy of the GNU General Public License
+#    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#
+#    Emir Turkes can be contacted at emir.turkes@eturkes.com
+
+# Load required packages, suppressing startup messages.
+# -----------------------------------------------------
+library(conflicted)
+packages <- c(
+  "Seurat", "parallelly", "ggplot2", "dplyr", "ggrepel", "viridis",
+  "DropletUtils", "scDblFinder", "BiocParallel", "DT", "scuttle"
+)
+invisible(
+  suppressPackageStartupMessages(
+    lapply(packages, FUN = library, character.only = TRUE)
+  )
+)
+# -----------------------------------------------------
+
+# Define global settings.
+# -----------------------
+knitr::opts_chunk$set(fig.width = 10, fig.height = 7, dpi = 96)
+# -----------------------
+
+# Define functions.
+# -----------------
+source(file.path("..", "utils.R"))
+# -----------------
+
+# Useful variables.
+# -----------------
+name <- "6_AT8"
+step <- 1
+
+data_dir <- file.path("..", "..", "data", "raw_data")
+cache_dir <- file.path("..", "..", "cache", name, paste0("step", "0", step))
+if (!dir.exists(cache_dir)) {
+  dir.create(cache_dir, recursive = TRUE)
+}
+
+protocol <- c("human", "droplet", "single-cell", "umis")
+vars_to_regress <- NULL
+parallel_override <- NULL
+# -----------------
+
+# Metadata to plot after dimensionality reduction and clustering.
+# Values in list can include "no_legend and/or "no_label" to exclude those.
+# -------------------------------------------------------------------------
+metadata_to_plot <- vector("list", length = 2)
+names(metadata_to_plot) <- c("seurat_clusters", "Phase")
+metadata_to_plot[[2]] <- "no_label"
+# -------------------------------------------------------------------------
+```
+
+# Cleaning
+
+We first read in the data and form a Seurat object.
+
+```{r}
+seurat <- CreateSeuratObject(
+  Read10X_h5(
+    file.path(data_dir, "GSM3704368_6-AT8_filtered_feature_bc_matrix.h5"),
+    use.names = FALSE
+  )
+)
+
+seurat@misc <- list(
+  geneids = rownames(
+    Read10X_h5(
+      file.path(data_dir, "GSM3704368_6-AT8_filtered_feature_bc_matrix.h5")
+    )
+  )
+)
+gene_anno <- data.frame(
+  symbol = unlist(seurat@misc), ensembl = rownames(seurat)
+)
+
+seurat
+```
+
+# QC
+
+In a droplet-based experiment, we first remove empty droplets.
+Since they are removed already, we just visualise it here.
+
+```{r}
+if (protocol[2] == "droplet") {
+  bcrank <- barcodeRanks(GetAssayData(seurat), lower = 20)
+  uniq <- !duplicated(bcrank$rank)
+  plot(
+    bcrank$rank[uniq], bcrank$total[uniq], log = "xy",
+    xlab = "Rank", ylab = "Total UMI count", cex.lab = 1.2
+  )
+  abline(h = metadata(bcrank)$inflection, col = "darkgreen", lty = 2)
+  abline(h = metadata(bcrank)$knee, col = "dodgerblue", lty = 2)
+  legend(
+    "bottomleft", legend = c("Inflection", "Knee"),
+    col = c("darkgreen", "dodgerblue"),
+    lty = 2, cex = 1.2
+  )
+  rm(bcrank)
+}
+```
+
+We remove cells low in unique features and total counts and calculate percentage of mitochondrial and ribosomal reads and other genes commonly used as indicators of low-quality cells.
+We also use mitochondrial reads as a proxy for ambient RNA contamination.
+
+```{r}
+mito <- grep("^MT-", gene_anno$symbol)
+datatable_download(gene_anno[mito, ])
+
+is_mito <- rownames(seurat) %in% gene_anno[mito, ]$ensembl
+mito <- which(rownames(seurat) %in% gene_anno[mito, ]$ensembl)
+seurat[["percent_mt"]] <- PercentageFeatureSet(
+  seurat, features = rownames(seurat)[mito]
+)
+
+ribo <- grep("^RP[SL][[:digit:]]", gene_anno$symbol)
+datatable_download(gene_anno[ribo, ])
+
+ribo <- which(rownames(seurat) %in% gene_anno[ribo, ]$ensembl)
+seurat[["percent_ribo"]] <- PercentageFeatureSet(
+  seurat, features = rownames(seurat)[ribo]
+)
+
+seurat[["percent_malat1"]] <- PercentageFeatureSet(
+  seurat, features = "ENSG00000251562"
+)
+
+if (length(mito) != 0) {
+  if (protocol[3] == "single-nuc") {
+    print(paste0("Removed ", length(mito), " mitochondrial genes:"))
+    seurat <- seurat[-mito, ]
+  } else {
+    print(
+      paste0("Found but did not remove ", length(mito), " mitochondrial genes:")
+    )
+  }
+}
+
+VlnPlot(
+  seurat,
+  features = c(
+    "nFeature_RNA", "nCount_RNA", "percent_mt", "percent_ribo", "percent_malat1"
+  ),
+  ncol = 5
+)
+
+seurat@meta.data %>%
+  ggplot(aes(x = nFeature_RNA)) +
+  geom_density(alpha = 0.2) +
+  scale_x_log10() +
+  theme_classic() +
+  ylab("Cell Density")
+
+seurat@meta.data %>%
+  ggplot(aes(x = nCount_RNA)) +
+  geom_density(alpha = 0.2) +
+  scale_x_log10() +
+  theme_classic() +
+  ylab("Cell Density")
+
+seurat@meta.data %>%
+  ggplot(aes(x = percent_mt)) +
+  geom_density(alpha = 0.2) +
+  theme_classic() +
+  ylab("Cell Density")
+
+seurat@meta.data %>%
+  ggplot(aes(x = percent_ribo)) +
+  geom_density(alpha = 0.2) +
+  theme_classic() +
+  ylab("Cell Density")
+
+seurat@meta.data %>%
+  ggplot(aes(x = percent_malat1)) +
+  geom_density(alpha = 0.2) +
+  theme_classic() +
+  ylab("Cell Density")
+```
+
+We perform doublet detection in a droplet-based experiments.
+
+```{r}
+if (protocol[2] == "droplet") {
+
+  rds <- file.path(cache_dir, "doublets.rds")
+  if (file.exists(rds)) {
+    sub_name <- "doublets"
+    seurat <- cluster_pipeline(
+      seurat, cache_dir = cache_dir,
+      sub_name = sub_name, protocol = protocol,
+      vars_to_regress = vars_to_regress, parallel_override = parallel_override,
+      res_divider = 20000
+    )
+  } else {
+    sce <- SingleCellExperiment(list(counts = GetAssayData(seurat)))
+    sce <- scDblFinder(sce, BPPARAM = MulticoreParam(availableCores()))
+    doublets <- sce$scDblFinder.class
+    rm(sce)
+    seurat$doublets <- ifelse(doublets == "doublet", yes = 1, no = 0)
+
+    sub_name <- "doublets"
+    seurat <- cluster_pipeline(
+      seurat, cache_dir = cache_dir,
+      sub_name = sub_name, protocol = protocol,
+      vars_to_regress = vars_to_regress, parallel_override = parallel_override,
+      res_divider = 20000
+    )
+  }
+
+  print(seurat)
+  FeaturePlot(seurat, features = "doublets")
+}
+```
+
+# Cluster Pipeline
+
+We run a pipeline that applies normalisation and scaling, dimensionality reduction, and clustering.
+Before running it, doublets and cells with 10% or greater percentage of mitochondrial reads are dropped.
+We also remove cells that are outliers in more than 3 MADs in terms of library size and number of unique features.
+
+```{r}
+remove <- which(seurat$doublets == 1)
+print(paste0("Remove doublets: ", length(remove)))
+seurat <- seurat[ , -remove]
+seurat
+
+seurat <- subset(seurat, subset = percent_mt < 10)
+print("Remove cells with 10% and over percent mitochondrial reads")
+seurat
+
+sce <- SingleCellExperiment(
+  list(counts = GetAssayData(seurat, assay = "RNA", layer = "counts"))
+)
+remove <- perCellQCFilters(perCellQCMetrics(sce))
+rm(sce)
+seurat <- seurat[ , !remove$discard]
+seurat
+
+sub_name <- "prep"
+seurat <- cluster_pipeline(
+  seurat, cache_dir = cache_dir,
+  sub_name = sub_name, protocol = protocol,
+  vars_to_regress = vars_to_regress, parallel_override = parallel_override,
+  cc = FALSE, res_divider = 50000, min_cells = 0
+)
+seurat
+
+for (i in seq_along(metadata_to_plot)) {
+  if (
+    "no_legend" %in% metadata_to_plot[[i]] &&
+      "no_label" %in% metadata_to_plot[[i]]
+  ) {
+    print(
+      red_dim_plot(
+        seurat, x = "umap1", y = "umap2", color = names(metadata_to_plot)[i]
+      ) +
+        NoLegend() +
+        ggtitle(names(metadata_to_plot)[i])
+    )
+  } else if ("no_legend" %in% metadata_to_plot[[i]]) {
+    print(
+      red_dim_plot(
+        seurat, x = "umap1", y = "umap2",
+        color = names(metadata_to_plot)[i], type = "cat"
+      ) +
+        NoLegend() +
+        ggtitle(names(metadata_to_plot)[i])
+    )
+  } else if ("no_label" %in% metadata_to_plot[[i]]) {
+    print(
+      red_dim_plot(
+        seurat, x = "umap1", y = "umap2", color = names(metadata_to_plot)[i]
+      ) +
+        ggtitle(names(metadata_to_plot)[i])
+    )
+  } else {
+    print(
+      red_dim_plot(
+        seurat, x = "umap1", y = "umap2",
+        color = names(metadata_to_plot)[i], type = "cat"
+      ) +
+        ggtitle(names(metadata_to_plot)[i])
+    )
+  }
+}
+
+red_dim_plot(
+  seurat, x = "umap1", y = "umap2", color = "nFeature_SCT", type = "cont"
+) + ggtitle("nFeature_SCT")
+red_dim_plot(
+  seurat, x = "umap1", y = "umap2", color = "nCount_SCT", type = "cont"
+) + ggtitle("nCount_SCT")
+red_dim_plot(
+  seurat, x = "umap1", y = "umap2", color = "nFeature_RNA", type = "cont"
+) + ggtitle("nFeature_RNA")
+red_dim_plot(
+  seurat, x = "umap1", y = "umap2", color = "nCount_RNA", type = "cont"
+) + ggtitle("nCount_RNA")
+
+red_dim_plot(
+  seurat, x = "umap1", y = "umap2", color = "percent_mt", type = "cont"
+) + ggtitle("percent_mt")
+red_dim_plot(
+  seurat, x = "umap1", y = "umap2", color = "percent_ribo", type = "cont"
+) + ggtitle("percent_ribo")
+red_dim_plot(
+  seurat, x = "umap1", y = "umap2", color = "percent_ribo", type = "cont"
+) + ggtitle("percent_malat1")
+
+VlnPlot(
+  seurat,
+  features = c("nFeature_RNA", "nCount_RNA"),
+  ncol = 2
+)
+VlnPlot(
+  seurat,
+  features = c("nFeature_SCT", "nCount_SCT"),
+  ncol = 2
+)
+VlnPlot(
+  seurat,
+  features = c("percent_mt", "percent_ribo"),
+  ncol = 2
+)
+```
+
+# References
+
+This is the concluding section of the document, where we output the `sessionInfo`, and create a bibliography for works cited.
+
+```{r}
+sessionInfo()
+```

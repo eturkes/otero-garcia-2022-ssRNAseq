@@ -26,6 +26,8 @@ RUN apt-get update \
         zlib1g-dev \
         libhdf5-dev \
         patch \
+        liblzma-dev \
+        libbz2-dev \
     && Rscript -e "install.packages('rmarkdown')" \
         -e "install.packages('stringr')" \
         -e "install.packages('conflicted')" \
@@ -44,6 +46,8 @@ RUN apt-get update \
         -e "BiocManager::install('biomaRt')" \
         -e "BiocManager::install('IHW')" \
         -e "BiocManager::install('ComplexHeatmap')" \
+        -e "BiocManager::install('DropletUtils')" \
+        -e "BiocManager::install('scDblFinder')" \
     && apt-get clean \
     && rm -Rf /var/lib/apt/lists/ \
         /tmp/downloaded_packages/ \
