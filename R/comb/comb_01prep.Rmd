@@ -153,42 +153,42 @@ if (file.exists(rds)) {
 
   seurat$donor <- factor(
     c(
+      rep("Donor1", times = ncol(files[[2]])),
+      rep("Donor2", times = ncol(files[[4]])),
+      rep("Donor3", times = ncol(files[[6]])),
+      rep("Donor4", times = ncol(files[[8]])),
+      rep("Donor5", times = ncol(files[[10]])),
+      rep("Donor6", times = ncol(files[[12]])),
+      rep("Donor7", times = ncol(files[[14]])),
+      rep("Donor8", times = ncol(files[[16]])),
       rep("Donor1", times = ncol(files[[1]])),
-      rep("Donor2", times = ncol(files[[2]])),
-      rep("Donor3", times = ncol(files[[3]])),
-      rep("Donor4", times = ncol(files[[4]])),
-      rep("Donor5", times = ncol(files[[5]])),
-      rep("Donor6", times = ncol(files[[6]])),
-      rep("Donor7", times = ncol(files[[7]])),
-      rep("Donor8", times = ncol(files[[8]])),
-      rep("Donor1", times = ncol(files[[9]])),
-      rep("Donor2", times = ncol(files[[10]])),
-      rep("Donor3", times = ncol(files[[11]])),
-      rep("Donor4", times = ncol(files[[12]])),
-      rep("Donor5", times = ncol(files[[13]])),
-      rep("Donor6", times = ncol(files[[14]])),
-      rep("Donor7", times = ncol(files[[15]])),
-      rep("Donor8", times = ncol(files[[16]]))
+      rep("Donor2", times = ncol(files[[3]])),
+      rep("Donor3", times = ncol(files[[5]])),
+      rep("Donor4", times = ncol(files[[7]])),
+      rep("Donor5", times = ncol(files[[9]])),
+      rep("Donor6", times = ncol(files[[11]])),
+      rep("Donor7", times = ncol(files[[13]])),
+      rep("Donor8", times = ncol(files[[15]]))
     )
   )
   seurat$tau <- factor(
     c(
-      rep("CTRL", times = ncol(files[[1]])),
       rep("CTRL", times = ncol(files[[2]])),
-      rep("CTRL", times = ncol(files[[3]])),
       rep("CTRL", times = ncol(files[[4]])),
-      rep("CTRL", times = ncol(files[[5]])),
       rep("CTRL", times = ncol(files[[6]])),
-      rep("CTRL", times = ncol(files[[7]])),
       rep("CTRL", times = ncol(files[[8]])),
+      rep("CTRL", times = ncol(files[[10]])),
+      rep("CTRL", times = ncol(files[[12]])),
+      rep("CTRL", times = ncol(files[[14]])),
+      rep("CTRL", times = ncol(files[[16]])),
+      rep("NFT", times = ncol(files[[1]])),
+      rep("NFT", times = ncol(files[[3]])),
+      rep("NFT", times = ncol(files[[5]])),
+      rep("NFT", times = ncol(files[[7]])),
       rep("NFT", times = ncol(files[[9]])),
-      rep("NFT", times = ncol(files[[10]])),
       rep("NFT", times = ncol(files[[11]])),
-      rep("NFT", times = ncol(files[[12]])),
       rep("NFT", times = ncol(files[[13]])),
-      rep("NFT", times = ncol(files[[14]])),
-      rep("NFT", times = ncol(files[[15]])),
-      rep("NFT", times = ncol(files[[16]]))
+      rep("NFT", times = ncol(files[[15]]))
     )
   )
 
