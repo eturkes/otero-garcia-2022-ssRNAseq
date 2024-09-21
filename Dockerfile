@@ -38,6 +38,7 @@ RUN apt-get update \
         -e "install.packages('flexdashboard')" \
         -e "install.packages('networkD3')" \
         -e "install.packages('BiocManager')" \
+        -e "install.packages('remotes')" \
         -e "BiocManager::install('glmGamPoi')" \
         -e "BiocManager::install('GSEABase')" \
         -e "BiocManager::install('scuttle')" \
@@ -48,6 +49,7 @@ RUN apt-get update \
         -e "BiocManager::install('ComplexHeatmap')" \
         -e "BiocManager::install('DropletUtils')" \
         -e "BiocManager::install('scDblFinder')" \
+        -e "remotes::install_github('immunogenomics/presto')" \
     && apt-get clean \
     && rm -Rf /var/lib/apt/lists/ \
         /tmp/downloaded_packages/ \

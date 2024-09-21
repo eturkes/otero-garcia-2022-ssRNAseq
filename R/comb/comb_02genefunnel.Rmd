@@ -1,0 +1,316 @@
+---
+title: "Otero-Garcia 2022 ssRNAseq - 02 GeneFunnel"
+author:
+  - name: "Emir Turkes"
+date: '`r strftime(Sys.time(), format = "%B %d, %Y")`'
+link-citations: true
+output:
+  html_document:
+    code_folding: hide
+    number_sections: true
+    theme: lumen
+    highlight: haddock
+    toc: true
+    toc_depth: 2
+    toc_float:
+      collapsed: false
+      smooth_scroll: false
+knit: (function(inputFile, encoding) {
+  rmarkdown::render(
+    inputFile, encoding = encoding,
+    output_file = file.path(
+      "..", "..", "results",
+      "comb", "otero_garcia_2022_ssRNAseq_02genefunnel.html"
+    ))})
+---
+
+<style type="text/css">
+body {font-size: 16px;}
+h1.title {font-size: 35px;}
+h1 {font-size: 24px;}
+h2 {font-size: 22px;}
+.toc-content {padding-left: 0px; padding-right: 0px;}
+div.tocify {width: 100%;}
+.tocify-subheader .tocify-item {
+  font-size: 0.95em; padding-left: 25px; text-indent: 0;
+}
+.tocify-subheader .tocify-subheader .tocify-item {
+  font-size: 0.95em; padding-left: 35px; text-indent: 0;
+}
+div.main-container {max-width: none; width: 100%;}
+</style>
+
+*This file is a part of [otero-garcia-2022-ssRNAseq](https://github.com/eturkes/otero-garcia-2022-ssRNAseq).*
+
+The table of contents in the top left is clickable and can be used to quickly navigate the document.
+To toggle the visibility of code, use the `CODE` toggles at the top right of chunks.
+The toggle at the start of the document controls the visibility of all chunks.
+
+```{r}
+#    This file is part of otero-garcia-2022-ssRNAseq.
+#    Copyright (C) 2024  Emir Turkes, UK DRI at UCL
+#
+#    This program is free software: you can redistribute it and/or modify
+#    it under the terms of the GNU General Public License as published by
+#    the Free Software Foundation, either version 3 of the License, or
+#    (at your option) any later version.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU General Public License for more details.
+#
+#    You should have received a copy of the GNU General Public License
+#    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#
+#    Emir Turkes can be contacted at emir.turkes@eturkes.com
+
+# Load required packages, suppressing startup messages.
+# -----------------------------------------------------
+library(conflicted)
+packages <- c("GSEABase", "Seurat", "GSVA", "Rcpp", "biomaRt", "Matrix")
+invisible(
+  suppressPackageStartupMessages(
+    lapply(packages, FUN = library, character.only = TRUE)
+  )
+)
+# -----------------------------------------------------
+
+# Define global settings.
+# -----------------------
+knitr::opts_chunk$set(fig.width = 10, fig.height = 7, dpi = 96)
+# -----------------------
+
+# Define functions.
+# -----------------
+source(file.path("..", "utils.R"))
+sourceCpp(file.path("..", "..", "src", "calculateScores.cpp"))
+
+`%notin%` <- Negate(`%in%`)
+# -----------------
+
+# Useful variables.
+# -----------------
+name <- "comb"
+step <- 2
+
+data_dir <- file.path("..", "..", "data")
+cache_dir <- file.path("..", "..", "cache", name, paste0("step", "0", step))
+if (!dir.exists(cache_dir)) {
+  dir.create(cache_dir, recursive = TRUE)
+}
+# -----------------
+```
+
+# Prep
+
+```{r}
+seurat <- readRDS(file.path(cache_dir, "..", "step01", "annotated_seurat.rds"))
+DefaultAssay(seurat) <- "RNA"
+
+rds <- file.path(cache_dir, "gene_sets.rds")
+if (file.exists(rds)) {
+  gene_sets <- readRDS(rds)
+} else {
+
+  gene_sets <- getGmt(
+    file.path(
+      data_dir, "gprofiler_hsapiens_ENSG_2024_08_25",
+      "hsapiens.GO.comb.ENSG.gmt"
+    )
+  )
+
+  remove <- unique(unlist(geneIds(gene_sets)))[
+    unique(unlist(geneIds(gene_sets))) %notin% rownames(seurat)
+  ]
+  remove <- which(
+    sapply(geneIds(gene_sets), FUN = function(x) any(x %in% remove))
+  )
+  gene_sets <- gene_sets[-remove]
+
+  for (i in seq_along(gene_sets@.Data)) {
+    go_id <- gene_sets[[i]]@setName
+    suppressWarnings(gene_sets[[i]]@setName <- gene_sets[[i]]@shortDescription)
+    suppressWarnings(gene_sets[[i]]@shortDescription <- go_id)
+  }
+
+  gene_sets_keep <- computeGeneSetsOverlapMax(
+    gene_sets, uniqGenes = unique(unlist(geneIds(gene_sets)))
+  )
+  gene_sets_keep <- rowSums(gene_sets_keep)
+  gene_sets_keep <- gene_sets_keep[order(gene_sets_keep, decreasing = TRUE)]
+  gene_sets <- gene_sets[match(names(gene_sets_keep), names(gene_sets))]
+
+  saveRDS(gene_sets, file = rds)
+}
+gene_sets
+
+rds <- file.path(cache_dir, "gene_sets_keep.rds")
+if (file.exists(rds)) {
+  gene_sets_keep <- readRDS(rds)
+} else {
+
+  dup <- sapply(
+    geneIds(gene_sets), FUN = function(x) paste(sort(x), collapse = "-")
+  )
+  dup <- which(duplicated(dup))
+  gene_sets_keep <- gene_sets[-dup]
+
+  keep <- filterGeneSets(gene_sets_keep, min.sz = 2, max.sz = 45)
+  gene_sets_keep <- gene_sets_keep[names(gene_sets_keep) %in% names(keep)]
+
+  gene_sets_keep <- gene_sets_keep[
+    !grepl("regulation", x = names(gene_sets_keep)) |
+      grepl("positive regulation", x = names(gene_sets_keep))
+  ]
+
+  gene_sets_keep <- gene_sets_keep[
+    !grepl("selection", x = names(gene_sets_keep)) |
+      grepl("positive selection", x = names(gene_sets_keep))
+  ]
+
+  mart <- useEnsembl("ensembl", "hsapiens_gene_ensembl")
+  attributes <- c("ensembl_gene_id", "chromosome_name")
+  gene_anno <- getBM(
+    attributes, filters = "ensembl_gene_id",
+    values = unique(unlist(geneIds(gene_sets_keep))), mart = mart
+  )
+  remove <- gene_anno[
+    gene_anno$chromosome_name == "Y" |
+      gene_anno$ensembl_gene_id == "ENSG00000229807" |
+      gene_anno$ensembl_gene_id == "ENSG00000270641",
+  ]$ensembl_gene_id
+  remove <- which(
+    sapply(geneIds(gene_sets_keep), FUN = function(x) any(x %in% remove))
+  )
+  gene_sets_keep <- gene_sets_keep[-remove]
+
+  gene_sets_ordered <- computeGeneSetsOverlapMax(
+    gene_sets_keep, uniqGenes = unique(unlist(geneIds(gene_sets_keep)))
+  )
+  gene_sets_ordered <- rowSums(gene_sets_ordered)
+  gene_sets_ordered <- gene_sets_ordered[order(gene_sets_ordered)]
+  gene_sets_keep <- gene_sets_keep[
+    match(names(gene_sets_ordered), names(gene_sets_keep))
+  ]
+
+  gene_sets_keep <- computeGeneSetsOverlapMax(
+    gene_sets_keep, uniqGenes = unique(unlist(geneIds(gene_sets_keep)))
+  )
+  gene_sets_keep[upper.tri(gene_sets_keep)] <- 0
+  diag(gene_sets_keep) <- 0
+  gene_sets_keep <- apply(gene_sets_keep, MARGIN = 1, FUN = max)
+  gene_sets_keep <- gene_sets_keep[gene_sets_keep < 0.7]
+
+  rm(gene_sets_ordered)
+  saveRDS(gene_sets_keep, file = rds)
+}
+
+gene_sets_sub <- gene_sets[names(gene_sets) %in% names(gene_sets_keep)]
+gene_sets_sub
+
+gene_anno <- data.frame(
+  symbol = unlist(seurat@misc), ensembl = rownames(seurat)
+)
+rds <- file.path(cache_dir, "gene_anno.rds")
+if (!file.exists(rds)) {
+  saveRDS(gene_anno, file = rds)
+}
+```
+
+# Gene Set Scoring
+
+```{r}
+rds <- file.path(cache_dir, "final_seurat.rds")
+if (file.exists(rds)) {
+  gc()
+  seurat <- readRDS(rds)
+  gc()
+} else {
+
+  DefaultAssay(seurat) <- "RNA"
+  gc()
+  scores <- calculateScores(
+    GetAssayData(seurat, layer = "counts"), rownames(seurat), geneIds(gene_sets)
+  )
+  gc()
+
+  rownames(scores) <- names(gene_sets)
+  colnames(scores) <- colnames(seurat)
+  gc()
+  scores <- Matrix(scores, sparse = TRUE)
+  gc()
+
+  seurat[["GF"]] <- CreateAssay5Object(scores, data = log1p(scores))
+  DefaultAssay(seurat) <- "GF"
+  seurat$nCount_GF <- colSums(seurat, layer = "counts")
+  seurat$nFeature_GF <- colSums(
+    GetAssayData(seurat, layer = "counts") > 0
+  )
+
+  DefaultAssay(seurat) <- "PREP_SCT"
+  gc()
+  scores <- calculateScores(
+    GetAssayData(seurat, layer = "counts"), rownames(seurat), geneIds(gene_sets)
+  )
+  gc()
+
+  rownames(scores) <- names(gene_sets)
+  colnames(scores) <- colnames(seurat)
+  gc()
+  scores <- Matrix(scores, sparse = TRUE)
+  gc()
+
+  seurat[["PREP_SCT_GF"]] <- CreateAssay5Object(scores, data = log1p(scores))
+  DefaultAssay(seurat) <- "PREP_SCT_GF"
+  seurat$nCount_PREP_SCT_GF <- colSums(seurat, layer = "counts")
+  seurat$nFeature_PREP_SCT_GF <- colSums(
+    GetAssayData(seurat, layer = "counts") > 0
+  )
+
+  seurat$ctype_donor_tau <- factor(
+    paste(seurat$ctype, seurat$donor, seurat$tau, sep = " - ")
+  )
+  seurat$donor_tau <- factor(
+    paste(seurat$donor, seurat$tau, sep = " - ")
+  )
+  seurat@active.ident <- seurat$ctype
+
+  gc()
+  saveRDS(seurat, file = rds)
+}
+```
+
+# Marker Analysis
+
+```{r}
+seurat@active.ident <- seurat$tau
+rds <- file.path(cache_dir, "ctype_markers.rds")
+if (file.exists(rds)) {
+  markers <- readRDS(rds)
+} else {
+  markers <- FindMarkers(
+    seurat, ident.1 = "NFT", ident.2 = "CTRL", verbose = FALSE
+  )
+  saveRDS(markers, file = rds)
+}
+
+seurat@active.ident <- seurat$ctype
+rds <- file.path(cache_dir, "NFT_markers.rds")
+if (file.exists(rds)) {
+  markers <- readRDS(rds)
+} else {
+  markers <- FindAllMarkers(
+    seurat, only.pos = TRUE, verbose = FALSE
+  )
+  saveRDS(markers, file = rds)
+}
+```
+
+# References
+
+This is the concluding section of the document, where we output the `sessionInfo`, and create a bibliography for works cited.
+
+```{r}
+sessionInfo()
+```
