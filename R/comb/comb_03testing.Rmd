@@ -1,0 +1,281 @@
+---
+title: "Otero-Garcia 2022 ssRNAseq - 03 Testing"
+author:
+  - name: "Emir Turkes"
+date: '`r strftime(Sys.time(), format = "%B %d, %Y")`'
+link-citations: true
+output:
+  html_document:
+    code_folding: hide
+    number_sections: true
+    theme: lumen
+    highlight: haddock
+    toc: true
+    toc_depth: 2
+    toc_float:
+      collapsed: false
+      smooth_scroll: false
+knit: (function(inputFile, encoding) {
+  rmarkdown::render(
+    inputFile, encoding = encoding,
+    output_file = file.path(
+      "..", "..", "results",
+      "comb", "otero_garcia_2022_ssRNAseq_03testing.html"
+    ))})
+---
+
+<style type="text/css">
+body {font-size: 16px;}
+h1.title {font-size: 35px;}
+h1 {font-size: 24px;}
+h2 {font-size: 22px;}
+.toc-content {padding-left: 0px; padding-right: 0px;}
+div.tocify {width: 100%;}
+.tocify-subheader .tocify-item {
+  font-size: 0.95em; padding-left: 25px; text-indent: 0;
+}
+.tocify-subheader .tocify-subheader .tocify-item {
+  font-size: 0.95em; padding-left: 35px; text-indent: 0;
+}
+div.main-container {max-width: none; width: 100%;}
+</style>
+
+*This file is a part of [otero-garcia-2022-ssRNAseq](https://github.com/eturkes/otero-garcia-2022-ssRNAseq).*
+
+The table of contents in the top left is clickable and can be used to quickly navigate the document.
+To toggle the visibility of code, use the `CODE` toggles at the top right of chunks.
+The toggle at the start of the document controls the visibility of all chunks.
+
+```{r}
+#    This file is part of otero-garcia-2022-ssRNAseq.
+#    Copyright (C) 2024  Emir Turkes, UK DRI at UCL
+#
+#    This program is free software: you can redistribute it and/or modify
+#    it under the terms of the GNU General Public License as published by
+#    the Free Software Foundation, either version 3 of the License, or
+#    (at your option) any later version.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU General Public License for more details.
+#
+#    You should have received a copy of the GNU General Public License
+#    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#
+#    Emir Turkes can be contacted at emir.turkes@eturkes.com
+
+# Load required packages, suppressing startup messages.
+# -----------------------------------------------------
+library(conflicted)
+conflicts_prefer(edgeR::cpm, .quiet = TRUE)
+packages <- c("GSEABase", "Seurat", "scuttle", "edgeR", "IHW")
+invisible(
+  suppressPackageStartupMessages(
+    lapply(packages, FUN = library, character.only = TRUE)
+  )
+)
+# -----------------------------------------------------
+
+# Define global settings.
+# -----------------------
+knitr::opts_chunk$set(fig.width = 10, fig.height = 7, dpi = 96)
+# -----------------------
+
+# Useful variables.
+# -----------------
+name <- "comb"
+step <- 3
+
+cache_dir <- file.path("..", "..", "cache", name, paste0("step", "0", step))
+if (!dir.exists(cache_dir)) {
+  dir.create(cache_dir, recursive = TRUE)
+}
+# -----------------
+```
+
+# Prep
+
+```{r}
+seurat <- readRDS(file.path(cache_dir, "..", "step02", "final_seurat.rds"))
+seurat
+
+ctypes <- list("EX L2-4 CUX2", "EX L4-5 RORB", "EX L5 RORB", "EX L5-6 THEMIS")
+seurat <- subset(seurat, idents = ctypes)
+gc()
+seurat
+
+gene_sets <- readRDS(
+  file.path(cache_dir, "..", "step02", "gene_sets.rds")
+)
+gene_sets_keep <- readRDS(
+  file.path(cache_dir, "..", "step02", "gene_sets_keep.rds")
+)
+gene_anno <- readRDS(file.path(cache_dir, "..", "step02", "gene_anno.rds"))
+```
+
+# Testing
+
+```{r}
+gse_data <- vector("list", length = 4)
+deg_data <- vector("list", length = 4)
+gse_list <- vector("list", length = 4)
+deg_list <- vector("list", length = 4)
+
+for (i in seq_along(ctypes)) {
+
+  gse <- as.SingleCellExperiment(
+    subset(seurat, idents = ctypes[i]), assay = "GF"
+  )
+  gse <- gse[rownames(gse) %in% names(gene_sets_keep), ]
+  gse <- suppressWarnings(
+    aggregateAcrossCells(
+      gse, colData(gse)[ , "donor_tau"],
+      use_exprs_values = "counts", statistics = "sum"
+    )
+  )
+  gse <- gse[ , order(gse$tau)]
+
+  deg <- as.SingleCellExperiment(
+    subset(seurat, idents = ctypes[i]), assay = "RNA"
+  )
+  deg <- suppressWarnings(
+    aggregateAcrossCells(
+      deg, colData(deg)[ , "donor_tau"],
+      use_exprs_values = "counts", statistics = "sum"
+    )
+  )
+  deg <- deg[ , order(deg$tau)]
+
+  dge_orig <- DGEList(counts(gse))
+  keep <- filterByExpr(
+    dge_orig, group = gse$tau,
+    min.count = 100, min.total.count = 150
+  )
+  dge_orig <- dge_orig[keep, ]
+  dge_orig <- calcNormFactors(dge_orig)
+  dge <- DGEList(counts(gse))
+  dge$samples$norm.factors <- dge_orig$samples$norm.factors
+  keep <- filterByExpr(
+    dge, group = gse$tau,
+    min.count = 100, min.total.count = 150
+  )
+  dge <- dge[keep, , keep.lib.sizes = FALSE]
+  dge <- calcNormFactors(dge)
+
+  gse <- gse[rownames(gse) %in% rownames(dge)]
+  logcounts(gse, withDimnames = FALSE) <- cpm(
+    dge, log = TRUE, prior.count = 0.3
+  )
+  gse_data[[i]] <- gse
+
+  gene_sets_sub <- gene_sets[names(gene_sets) %in% rownames(gse)]
+  gene_sets_sub <- unique(unlist(geneIds(gene_sets_sub)))
+  deg <- deg[rownames(deg) %in% gene_sets_sub, ]
+  dge_orig <- DGEList(counts(deg))
+  keep <- filterByExpr(
+    dge_orig, group = deg$tau,
+    min.count = 50, min.total.count = 75
+  )
+  dge_orig <- dge_orig[keep, ]
+  dge_orig <- calcNormFactors(dge_orig)
+  dge <- DGEList(counts(deg))
+  dge$samples$norm.factors <- dge_orig$samples$norm.factors
+  keep <- filterByExpr(
+    dge, group = deg$tau,
+    min.count = 50, min.total.count = 75
+  )
+  dge <- dge[keep, , keep.lib.sizes = FALSE]
+  dge <- calcNormFactors(dge)
+
+  deg <- deg[rownames(deg) %in% rownames(dge)]
+  logcounts(deg, withDimnames = FALSE) <- cpm(
+    dge, log = TRUE, prior.count = 0.1
+  )
+  deg_data[[i]] <- deg
+
+  design <- model.matrix(~ 0 + gse$tau)
+  colnames(design) <- make.names(colnames(design))
+  cont_mat <- makeContrasts(
+    NFT_CTRL =
+      gse.tauNFT -
+      gse.tauCTRL,
+    levels = design
+  )
+
+  corr <- duplicateCorrelation(logcounts(gse), design, block = gse$donor)
+  fit <- lmFit(
+    logcounts(gse), design,
+    correlation = corr$consensus.correlation, block = gse$donor
+  )
+  fit <- contrasts.fit(fit, cont_mat)
+  fit <- eBayes(fit, trend = TRUE, robust = TRUE)
+  print(plotSA(fit))
+
+  tests <- decideTests(fit, method = "global")
+  write.fit(
+    fit, tests, file.path(cache_dir, "results.tsv"),
+    adjust = "BH", F.adjust = "BH", method = "global"
+  )
+  gse_list[[i]] <- read.delim(file.path(cache_dir, "results.tsv"))
+
+  corr <- duplicateCorrelation(logcounts(deg), design, block = deg$donor)
+  fit <- lmFit(
+    logcounts(deg), design,
+    correlation = corr$consensus.correlation, block = deg$donor
+  )
+  fit <- contrasts.fit(fit, cont_mat)
+  fit <- eBayes(fit, trend = TRUE, robust = TRUE)
+  print(plotSA(fit))
+
+  tests <- decideTests(fit, method = "global")
+  write.fit(
+    fit, tests, file.path(cache_dir, "results.tsv"),
+    adjust = "BH", F.adjust = "BH", method = "global"
+  )
+  deg_list[[i]] <- read.delim(file.path(cache_dir, "results.tsv"))
+}
+
+results <- rbind(gse_list[[1]], gse_list[[2]], gse_list[[3]], gse_list[[4]])
+gse_corrections <- data.frame(mean = results[ , 2], p = results[ , 5])
+gse_corrections <- ihw(p ~ mean,  data = gse_corrections, alpha = 0.05)
+gse_corrections <- adj_pvalues(gse_corrections)
+
+results <- rbind(deg_list[[1]], deg_list[[2]], deg_list[[3]], deg_list[[4]])
+deg_corrections <- data.frame(mean = results[ , 2], p = results[ , 5])
+deg_corrections <- ihw(p ~ mean,  data = deg_corrections, alpha = 0.05)
+deg_corrections <- adj_pvalues(deg_corrections)
+
+rds <- file.path(cache_dir, "gse_data.rds")
+if (!file.exists(rds)) {
+  saveRDS(gse_data, file = rds)
+}
+rds <- file.path(cache_dir, "deg_data.rds")
+if (!file.exists(rds)) {
+  saveRDS(deg_data, file = rds)
+}
+rds <- file.path(cache_dir, "gse_list.rds")
+if (!file.exists(rds)) {
+  saveRDS(gse_list, file = rds)
+}
+rds <- file.path(cache_dir, "deg_list.rds")
+if (!file.exists(rds)) {
+  saveRDS(deg_list, file = rds)
+}
+rds <- file.path(cache_dir, "gse_corrections.rds")
+if (!file.exists(rds)) {
+  saveRDS(gse_corrections, file = rds)
+}
+rds <- file.path(cache_dir, "deg_corrections.rds")
+if (!file.exists(rds)) {
+  saveRDS(deg_corrections, file = rds)
+}
+```
+
+# References
+
+This is the concluding section of the document, where we output the `sessionInfo`, and create a bibliography for works cited.
+
+```{r}
+sessionInfo()
+```
