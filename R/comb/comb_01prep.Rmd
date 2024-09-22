@@ -324,6 +324,9 @@ Remove GABAergic cells then use the author's Seurat object as a reference to map
 
 ```{r}
 FeaturePlot(
+  seurat, "ENSG00000104888", order = TRUE, cols = c("lightgrey", "red")
+) + ggtitle("SLC17A7")
+FeaturePlot(
   seurat, "ENSG00000128683", order = TRUE, cols = c("lightgrey", "red")
 ) + ggtitle("GAD1")
 FeaturePlot(
@@ -382,10 +385,10 @@ if (file.exists(rds) & file.exists(rds2)) {
   
   seurat <- RenameIdents(
     object = seurat, "0" = "EX L2-4 CUX2", "1" = "EX L5 RORB",
-    "2" = "EX L4-5 RORB", "3" = "IN LAMP5-CALB2", "4" = "EX L5-6 THEMIS",
-    "5" = "IN PVALB", "6" = "EX L6 FEZF2", "7" = "EX L5 FEZF2",
-    "8" = "Astrocyte", "9" = "EX L6 THEMIS", "10" = "Oligodendrocyte",
-    "11" = "OPC", "12" = "IN SST", "12" = "Oligodendrocyte"
+    "2" = "EX L4-5 RORB", "3" = "EX L5-6 THEMIS", "4" = "IN PVALB",
+    "5" = "IN CALB2", "6" = "EX L6 FEZF2", "7" = "IN LAMP5",
+    "8" = "EX L5 FEZF2", "9" = "Astrocyte", "10" = "EX L6 THEMIS",
+    "11" = "Oligodendrocyte", "12" = "OPC", "13" = "IN SST"
   )
   seurat@active.ident <- factor(as.character(seurat@active.ident))
   seurat$ctype <- seurat@active.ident
