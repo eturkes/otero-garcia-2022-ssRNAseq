@@ -155,8 +155,7 @@ fit <- contrasts.fit(fit, cont_mat_deg)
 fit <- eBayes(fit, trend = TRUE, robust = TRUE)
 
 deg_corrected[[idx]] <- removeBatchEffect(
-  logcounts(deg), group = deg$tau,
-  correlation = corr$consensus.correlation, block = deg$donor
+  logcounts(deg), batch = deg$donor, group = deg$tau
 )
 
 tests <- decideTests(fit, method = "global")
@@ -388,8 +387,7 @@ fit <- contrasts.fit(fit, cont_mat_gse)
 fit <- eBayes(fit, trend = TRUE, robust = TRUE)
 
 gse_corrected[[idx]] <- removeBatchEffect(
-  logcounts(gse), group = gse$tau,
-  correlation = corr$consensus.correlation, block = gse$donor
+  logcounts(gse), batch = gse$donor, group = gse$tau
 )
 
 tests <- decideTests(fit, method = "global")
@@ -846,8 +844,7 @@ fit <- contrasts.fit(fit, cont_mat_deg)
 fit <- eBayes(fit, trend = TRUE, robust = TRUE)
 
 deg_corrected[[idx]] <- removeBatchEffect(
-  logcounts(deg), group = deg$tau,
-  correlation = corr$consensus.correlation, block = deg$donor
+  logcounts(deg), batch = deg$donor, group = deg$tau
 )
 
 tests <- decideTests(fit, method = "global")
@@ -1079,8 +1076,7 @@ fit <- contrasts.fit(fit, cont_mat_gse)
 fit <- eBayes(fit, trend = TRUE, robust = TRUE)
 
 gse_corrected[[idx]] <- removeBatchEffect(
-  logcounts(gse), group = gse$tau,
-  correlation = corr$consensus.correlation, block = gse$donor
+  logcounts(gse), batch = gse$donor, group = gse$tau
 )
 
 tests <- decideTests(fit, method = "global")
@@ -1537,8 +1533,7 @@ fit <- contrasts.fit(fit, cont_mat_deg)
 fit <- eBayes(fit, trend = TRUE, robust = TRUE)
 
 deg_corrected[[idx]] <- removeBatchEffect(
-  logcounts(deg), group = deg$tau,
-  correlation = corr$consensus.correlation, block = deg$donor
+  logcounts(deg), batch = deg$donor, group = deg$tau
 )
 
 tests <- decideTests(fit, method = "global")
@@ -1770,8 +1765,7 @@ fit <- contrasts.fit(fit, cont_mat_gse)
 fit <- eBayes(fit, trend = TRUE, robust = TRUE)
 
 gse_corrected[[idx]] <- removeBatchEffect(
-  logcounts(gse), group = gse$tau,
-  correlation = corr$consensus.correlation, block = gse$donor
+  logcounts(gse), batch = gse$donor, group = gse$tau
 )
 
 tests <- decideTests(fit, method = "global")
@@ -2228,8 +2222,7 @@ fit <- contrasts.fit(fit, cont_mat_deg)
 fit <- eBayes(fit, trend = TRUE, robust = TRUE)
 
 deg_corrected[[idx]] <- removeBatchEffect(
-  logcounts(deg), group = deg$tau,
-  correlation = corr$consensus.correlation, block = deg$donor
+  logcounts(deg), batch = deg$donor, group = deg$tau
 )
 
 tests <- decideTests(fit, method = "global")
@@ -2462,8 +2455,7 @@ fit <- contrasts.fit(fit, cont_mat_gse)
 fit <- eBayes(fit, trend = TRUE, robust = TRUE)
 
 gse_corrected[[idx]] <- removeBatchEffect(
-  logcounts(gse), group = gse$tau,
-  correlation = corr$consensus.correlation, block = gse$donor
+  logcounts(gse), batch = gse$donor, group = gse$tau
 )
 
 tests <- decideTests(fit, method = "global")
