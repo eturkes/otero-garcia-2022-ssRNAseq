@@ -252,7 +252,7 @@ if (protocol[2] == "droplet") {
       seurat, cache_dir = cache_dir,
       sub_name = sub_name, protocol = protocol,
       vars_to_regress = vars_to_regress, parallel_override = parallel_override,
-      res_divider = 20000
+      res_divider = 10000
     )
   } else {
     sce <- SingleCellExperiment(list(counts = GetAssayData(seurat)))
@@ -266,7 +266,7 @@ if (protocol[2] == "droplet") {
       seurat, cache_dir = cache_dir,
       sub_name = sub_name, protocol = protocol,
       vars_to_regress = vars_to_regress, parallel_override = parallel_override,
-      res_divider = 20000
+      res_divider = 10000
     )
   }
 
@@ -304,7 +304,7 @@ seurat <- cluster_pipeline(
   seurat, cache_dir = cache_dir,
   sub_name = sub_name, protocol = protocol,
   vars_to_regress = vars_to_regress, parallel_override = parallel_override,
-  cc = FALSE, res_divider = 50000, min_cells = 0
+  cc = FALSE, res_divider = 10000, min_cells = 0
 )
 seurat
 
