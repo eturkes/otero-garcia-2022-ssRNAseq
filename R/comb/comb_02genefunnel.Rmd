@@ -68,7 +68,7 @@ The toggle at the start of the document controls the visibility of all chunks.
 # Load required packages, suppressing startup messages.
 # -----------------------------------------------------
 library(conflicted)
-packages <- c("GSEABase", "Seurat", "GSVA", "Rcpp", "biomaRt", "Matrix")
+packages <- c("GSEABase", "Seurat", "GSVA", "Rcpp", "biomaRt", "Matrix", "BiocParallel", "parallelly")
 invisible(
   suppressPackageStartupMessages(
     lapply(packages, FUN = library, character.only = TRUE)
@@ -145,16 +145,39 @@ if (file.exists(rds)) {
 }
 gene_sets
 
+# gene_anno <- data.frame(
+#   symbol = unlist(seurat@misc), ensembl = rownames(seurat)
+# )
+# rds <- file.path(cache_dir, "gene_anno.rds")
+# if (!file.exists(rds)) {
+#   saveRDS(gene_anno, file = rds)
+# }
+
 rds <- file.path(cache_dir, "gene_sets_keep.rds")
 if (file.exists(rds)) {
   gene_sets_keep <- readRDS(rds)
 } else {
 
+  gene_sets_keep <- gene_sets
+
+  # brain_gene_sets <- getGmt(
+  #   file.path(data_dir, "BrainGMTv2_HumanOrthologs_nodup.gmt")
+  # )
+  # brain_gene_sets <- unique(unlist(geneIds(brain_gene_sets)))
+  # gene_anno_sub <- gene_anno[gene_anno$symbol %in% brain_gene_sets, ]
+  # keep <- which(
+  #   sapply(
+  #     geneIds(gene_sets_keep),
+  #     FUN = function(x) any(x %in% gene_anno_sub$ensembl)
+  #   )
+  # )
+  # gene_sets_keep <- gene_sets_keep[keep]
+
   dup <- sapply(
-    geneIds(gene_sets), FUN = function(x) paste(sort(x), collapse = "-")
+    geneIds(gene_sets_keep), FUN = function(x) paste(sort(x), collapse = "-")
   )
   dup <- which(duplicated(dup))
-  gene_sets_keep <- gene_sets[-dup]
+  gene_sets_keep <- gene_sets_keep[-dup]
 
   keep <- filterGeneSets(gene_sets_keep, min.sz = 2, max.sz = 45)
   gene_sets_keep <- gene_sets_keep[names(gene_sets_keep) %in% names(keep)]
@@ -200,7 +223,11 @@ if (file.exists(rds)) {
   gene_sets_keep[upper.tri(gene_sets_keep)] <- 0
   diag(gene_sets_keep) <- 0
   gene_sets_keep <- apply(gene_sets_keep, MARGIN = 1, FUN = max)
-  gene_sets_keep <- gene_sets_keep[gene_sets_keep < 0.7]
+  gene_sets_keep2 <- gene_sets[names(gene_sets) %in% names(gene_sets_keep)]
+  gene_sets_keep2 <- gene_sets_keep2[
+    match(names(gene_sets_keep), names(gene_sets_keep2))
+  ]
+  # gene_sets_keep <- gene_sets_keep[gene_sets_keep < 0.75]
 
   rm(gene_sets_ordered)
   saveRDS(gene_sets_keep, file = rds)
@@ -230,15 +257,10 @@ if (file.exists(rds)) {
 
   DefaultAssay(seurat) <- "RNA"
   gc()
-  scores <- calculateScores(
-    GetAssayData(seurat, layer = "counts"), rownames(seurat), geneIds(gene_sets)
+  scores <- genefunnel(
+    GetAssayData(seurat, layer = "counts"), geneIds(gene_sets),
+    BPPARAM = MulticoreParam(availableCores())
   )
-  gc()
-
-  rownames(scores) <- names(gene_sets)
-  colnames(scores) <- colnames(seurat)
-  gc()
-  scores <- Matrix(scores, sparse = TRUE)
   gc()
 
   seurat[["GF"]] <- CreateAssay5Object(scores, data = log1p(scores))
@@ -250,15 +272,10 @@ if (file.exists(rds)) {
 
   DefaultAssay(seurat) <- "PREP_SCT"
   gc()
-  scores <- calculateScores(
-    GetAssayData(seurat, layer = "counts"), rownames(seurat), geneIds(gene_sets)
+  scores <- genefunnel(
+    GetAssayData(seurat, layer = "counts"), geneIds(gene_sets),
+    BPPARAM = MulticoreParam(availableCores())
   )
-  gc()
-
-  rownames(scores) <- names(gene_sets)
-  colnames(scores) <- colnames(seurat)
-  gc()
-  scores <- Matrix(scores, sparse = TRUE)
   gc()
 
   seurat[["PREP_SCT_GF"]] <- CreateAssay5Object(scores, data = log1p(scores))

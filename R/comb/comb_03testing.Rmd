@@ -117,158 +117,148 @@ gene_anno <- readRDS(file.path(cache_dir, "..", "step02", "gene_anno.rds"))
 # Testing
 
 ```{r}
-gse_data <- vector("list", length = 4)
-deg_data <- vector("list", length = 4)
-gse_list <- vector("list", length = 4)
-deg_list <- vector("list", length = 4)
-
-for (i in seq_along(ctypes)) {
-
-  gse <- as.SingleCellExperiment(
-    subset(seurat, idents = ctypes[i]), assay = "GF"
+gse <- as.SingleCellExperiment(seurat, assay = "GF")
+# counts(gse) <- pmax(counts(gse), 0)
+gse <- gse[rownames(gse) %in% names(gene_sets_keep), ]
+gse <- suppressWarnings(
+  aggregateAcrossCells(
+    gse, colData(gse)[ , "donor_tau"],
+    use_exprs_values = "counts", statistics = "sum"
   )
-  gse <- gse[rownames(gse) %in% names(gene_sets_keep), ]
-  gse <- suppressWarnings(
-    aggregateAcrossCells(
-      gse, colData(gse)[ , "donor_tau"],
-      use_exprs_values = "counts", statistics = "sum"
-    )
-  )
-  gse <- gse[ , order(gse$tau)]
+)
+gse <- gse[ , order(gse$tau)]
 
-  deg <- as.SingleCellExperiment(
-    subset(seurat, idents = ctypes[i]), assay = "RNA"
+deg <- as.SingleCellExperiment(seurat, assay = "RNA")
+deg <- suppressWarnings(
+  aggregateAcrossCells(
+    deg, colData(deg)[ , "donor_tau"],
+    use_exprs_values = "counts", statistics = "sum"
   )
-  deg <- suppressWarnings(
-    aggregateAcrossCells(
-      deg, colData(deg)[ , "donor_tau"],
-      use_exprs_values = "counts", statistics = "sum"
-    )
-  )
-  deg <- deg[ , order(deg$tau)]
+)
+deg <- deg[ , order(deg$tau)]
 
-  dge_orig <- DGEList(counts(gse))
-  keep <- filterByExpr(
-    dge_orig, group = gse$tau,
-    min.count = 100, min.total.count = 150
-  )
-  dge_orig <- dge_orig[keep, ]
-  dge_orig <- calcNormFactors(dge_orig)
-  dge <- DGEList(counts(gse))
-  dge$samples$norm.factors <- dge_orig$samples$norm.factors
-  keep <- filterByExpr(
-    dge, group = gse$tau,
-    min.count = 100, min.total.count = 150
-  )
-  dge <- dge[keep, , keep.lib.sizes = FALSE]
-  dge <- calcNormFactors(dge)
+dge_orig <- DGEList(counts(gse))
+keep <- filterByExpr(
+  dge_orig, group = gse$tau,
+  min.count = 10, min.total.count = 15
+)
+dge_orig <- dge_orig[keep, ]
+dge_orig <- calcNormFactors(dge_orig)
+dge <- DGEList(counts(gse))
+dge$samples$norm.factors <- dge_orig$samples$norm.factors
+keep <- filterByExpr(
+  dge, group = gse$tau,
+  min.count = 10, min.total.count = 15
+)
+dge <- dge[keep, , keep.lib.sizes = FALSE]
+dge <- calcNormFactors(dge)
 
-  gse <- gse[rownames(gse) %in% rownames(dge)]
-  logcounts(gse, withDimnames = FALSE) <- cpm(
-    dge, log = TRUE, prior.count = 0.3
-  )
-  gse_data[[i]] <- gse
+gse <- gse[rownames(gse) %in% rownames(dge)]
+logcounts(gse, withDimnames = FALSE) <- cpm(
+  dge, log = TRUE, prior.count = 6
+)
 
-  gene_sets_sub <- gene_sets[names(gene_sets) %in% rownames(gse)]
-  gene_sets_sub <- unique(unlist(geneIds(gene_sets_sub)))
-  deg <- deg[rownames(deg) %in% gene_sets_sub, ]
-  dge_orig <- DGEList(counts(deg))
-  keep <- filterByExpr(
-    dge_orig, group = deg$tau,
-    min.count = 50, min.total.count = 75
-  )
-  dge_orig <- dge_orig[keep, ]
-  dge_orig <- calcNormFactors(dge_orig)
-  dge <- DGEList(counts(deg))
-  dge$samples$norm.factors <- dge_orig$samples$norm.factors
-  keep <- filterByExpr(
-    dge, group = deg$tau,
-    min.count = 50, min.total.count = 75
-  )
-  dge <- dge[keep, , keep.lib.sizes = FALSE]
-  dge <- calcNormFactors(dge)
+design <- model.matrix(~ 0 + gse$tau)
+colnames(design) <- make.names(colnames(design))
+cont_mat <- makeContrasts(
+  NFT_CTRL =
+    gse.tauNFT -
+    gse.tauCTRL,
+  levels = design
+)
 
-  deg <- deg[rownames(deg) %in% rownames(dge)]
-  logcounts(deg, withDimnames = FALSE) <- cpm(
-    dge, log = TRUE, prior.count = 0.1
-  )
-  deg_data[[i]] <- deg
+corr <- duplicateCorrelation(logcounts(gse), design, block = gse$donor)
+fit <- lmFit(
+  logcounts(gse), design,
+  correlation = corr$consensus.correlation, block = gse$donor
+)
+fit <- contrasts.fit(fit, cont_mat)
+fit <- eBayes(fit, trend = TRUE, robust = TRUE)
+plotSA(fit)
 
-  design <- model.matrix(~ 0 + gse$tau)
-  colnames(design) <- make.names(colnames(design))
-  cont_mat <- makeContrasts(
-    NFT_CTRL =
-      gse.tauNFT -
-      gse.tauCTRL,
-    levels = design
-  )
+tests <- decideTests(fit)
+tc <- textConnection("results", open = "w")
+write.fit(fit, tests, file = tc, adjust = "BH")
+close(tc)
+results_gse <- read.delim(text = results)
 
-  corr <- duplicateCorrelation(logcounts(gse), design, block = gse$donor)
-  fit <- lmFit(
-    logcounts(gse), design,
-    correlation = corr$consensus.correlation, block = gse$donor
-  )
-  fit <- contrasts.fit(fit, cont_mat)
-  fit <- eBayes(fit, trend = TRUE, robust = TRUE)
-  print(plotSA(fit))
+rownames(results_gse) <- results_gse$X
+results_gse <- results_gse[ , 2:6]
+results_gse$GeneSet <- rownames(results_gse)
+results_gse <- results_gse[order(results_gse$P.value), ]
 
-  tests <- decideTests(fit, method = "global")
-  write.fit(
-    fit, tests, file.path(cache_dir, "results.tsv"),
-    adjust = "BH", F.adjust = "BH", method = "global"
-  )
-  gse_list[[i]] <- read.delim(file.path(cache_dir, "results.tsv"))
+gene_sets_sub <- gene_sets[names(gene_sets) %in% rownames(gse)]
+gene_sets_sub <- unique(unlist(geneIds(gene_sets_sub)))
+deg <- deg[rownames(deg) %in% gene_sets_sub, ]
+dge_orig <- DGEList(counts(deg))
+keep <- filterByExpr(
+  dge_orig, group = deg$tau,
+  min.count = 10, min.total.count = 15
+)
+dge_orig <- dge_orig[keep, ]
+dge_orig <- calcNormFactors(dge_orig)
+dge <- DGEList(counts(deg))
+dge$samples$norm.factors <- dge_orig$samples$norm.factors
+keep <- filterByExpr(
+  dge, group = deg$tau,
+  min.count = 10, min.total.count = 15
+)
+dge <- dge[keep, , keep.lib.sizes = FALSE]
+dge <- calcNormFactors(dge)
 
-  corr <- duplicateCorrelation(logcounts(deg), design, block = deg$donor)
-  fit <- lmFit(
-    logcounts(deg), design,
-    correlation = corr$consensus.correlation, block = deg$donor
-  )
-  fit <- contrasts.fit(fit, cont_mat)
-  fit <- eBayes(fit, trend = TRUE, robust = TRUE)
-  print(plotSA(fit))
+deg <- deg[rownames(deg) %in% rownames(dge)]
+logcounts(deg, withDimnames = FALSE) <- cpm(
+  dge, log = TRUE, prior.count = 4
+)
 
-  tests <- decideTests(fit, method = "global")
-  write.fit(
-    fit, tests, file.path(cache_dir, "results.tsv"),
-    adjust = "BH", F.adjust = "BH", method = "global"
-  )
-  deg_list[[i]] <- read.delim(file.path(cache_dir, "results.tsv"))
-}
+corr <- duplicateCorrelation(logcounts(deg), design, block = deg$donor)
+fit <- lmFit(
+  logcounts(deg), design,
+  correlation = corr$consensus.correlation, block = deg$donor
+)
+fit <- contrasts.fit(fit, cont_mat)
+fit <- eBayes(fit, trend = TRUE, robust = TRUE)
+plotSA(fit)
 
-results <- rbind(gse_list[[1]], gse_list[[2]], gse_list[[3]], gse_list[[4]])
-gse_corrections <- data.frame(mean = results[ , 2], p = results[ , 5])
-gse_corrections <- ihw(p ~ mean,  data = gse_corrections, alpha = 0.05)
-gse_corrections <- adj_pvalues(gse_corrections)
+tests <- decideTests(fit)
+tc <- textConnection("results", open = "w")
+write.fit(fit, tests, file = tc, adjust = "BH")
+close(tc)
+results_deg <- read.delim(text = results)
 
-results <- rbind(deg_list[[1]], deg_list[[2]], deg_list[[3]], deg_list[[4]])
-deg_corrections <- data.frame(mean = results[ , 2], p = results[ , 5])
-deg_corrections <- ihw(p ~ mean,  data = deg_corrections, alpha = 0.05)
-deg_corrections <- adj_pvalues(deg_corrections)
+rownames(results_deg) <- results_deg$X
+results_deg <- results_deg[ , 2:6]
+gene_anno_sub <- gene_anno[gene_anno$ensembl %in% rownames(results_deg), ]
+gene_anno_sub <- gene_anno_sub[
+  match(rownames(results_deg), gene_anno_sub$ensembl),
+]
+results_deg$Gene <- gene_anno_sub$symbol
+results_deg <- results_deg[ , c(ncol(results_deg), 1:(ncol(results_deg) - 1))]
+results_deg <- results_deg[order(results_deg$P.value), ]
 
-rds <- file.path(cache_dir, "gse_data.rds")
+meta <- data.frame(donor = gse$donor, tau = gse$tau)
+gse <- removeBatchEffect(logcounts(gse), batch = gse$donor, group = gse$tau)
+deg <- removeBatchEffect(logcounts(deg), batch = deg$donor, group = deg$tau)
+
+rds <- file.path(cache_dir, "meta.rds")
 if (!file.exists(rds)) {
-  saveRDS(gse_data, file = rds)
+  saveRDS(meta, file = rds)
 }
-rds <- file.path(cache_dir, "deg_data.rds")
+rds <- file.path(cache_dir, "gse.rds")
 if (!file.exists(rds)) {
-  saveRDS(deg_data, file = rds)
+  saveRDS(gse, file = rds)
 }
-rds <- file.path(cache_dir, "gse_list.rds")
+rds <- file.path(cache_dir, "deg.rds")
 if (!file.exists(rds)) {
-  saveRDS(gse_list, file = rds)
+  saveRDS(deg, file = rds)
 }
-rds <- file.path(cache_dir, "deg_list.rds")
+rds <- file.path(cache_dir, "res_gse.rds")
 if (!file.exists(rds)) {
-  saveRDS(deg_list, file = rds)
+  saveRDS(results_gse, file = rds)
 }
-rds <- file.path(cache_dir, "gse_corrections.rds")
+rds <- file.path(cache_dir, "res_deg.rds")
 if (!file.exists(rds)) {
-  saveRDS(gse_corrections, file = rds)
-}
-rds <- file.path(cache_dir, "deg_corrections.rds")
-if (!file.exists(rds)) {
-  saveRDS(deg_corrections, file = rds)
+  saveRDS(results_deg, file = rds)
 }
 ```
 

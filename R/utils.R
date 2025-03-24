@@ -480,3 +480,25 @@ computeGeneSetsOverlapMax <- function(gSets, uniqGenes, min.sz=1, max.sz=Inf) {
 
   return (overlapMatrix)
 }
+
+genefunnel <- function(mat, gene_sets, BPPARAM = bpparam()) {
+
+  if (!inherits(mat, "sparseMatrix")) {
+    mat <- Matrix(mat, sparse = TRUE)
+  }
+
+  result <- bplapply(
+    seq_len(ncol(mat)),
+    function(i) {
+      calculateScores(mat[, i, drop = FALSE], rownames(mat), gene_sets)
+    },
+    BPPARAM = BPPARAM
+  )
+
+  scores <- do.call(cbind, result)
+  rownames(scores) <- names(gene_sets)
+  colnames(scores) <- colnames(mat)
+  # scores <- Matrix(scores, sparse = TRUE)
+
+  return(scores)
+}
